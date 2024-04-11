@@ -674,12 +674,20 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
 #     1. filename: file path to hdf5 (.h5) file containing total scan data
 #     2. min_energy: minimum of energy range of interest (keV)
 #     3. elements: anticipated elements contained in the sample from background analysis using pyXRF
-# * Outputs
-#     1. detector_2D_map_fig: HTML figure containing 2D map of detector
+#     4. AOI_x, AOI_y, BKG_x, BKG_y: x and y ranges of the particle of interest and equally sized background region
+#        determined by the analyzing the file with AOI_particle_analysis
+#     5. prom, height, dist: peak parameters determined by the analyzing the file with AOI_particle_analysis
+#     6. bad_pixels: number of bad/dead pixels in the detector image
+#     7. error_peaks: peaks to be ignored in the peak fitting that result from noise in the data. Adjusting the peak parameters
+#        to remove these pekas results in loss of peak(s) of interest        
+# * Outputs detector_data, fig1, peak_fit_params, x_pos, y_pos, matched_peaks
+#     1. detector_data: data used to make detector plot
 #     2. fig1: HTML figure containing all relevant data/information processed that
 #        can be used later to plot the results        
 #     3. peak_fit_params: parameters used to define the gaussian fit of peaks in background subtracted partilce spectrum
-def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, prom, height, dist, energy_range, bad_pixels):
+#     4. x_pos, y_pos: x and y position of the detector image location based on the sample stage
+#     5. matched_peaks: peaks matched to an element known to be present
+def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, prom, height, dist, bad_pixels, error_peaks):
     ########## Load data file in variable ##########
     with h5py.File(filename, 'r') as file:
         data = file['xrfmap/detsum/counts'][:]
@@ -788,6 +796,15 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
     labels = []
     for i in range(len(peaks)): labels.extend(['Peak '+str(i+1)])    
        
+    ## Remove peaks resulting from overfitting/noise in data 
+    if error_peaks:
+        error_peaks_idx = [num - 1 for num in error_peaks]
+        # Create a boolean mask to select peaks to keep
+        mask = np.ones(peaks.shape, dtype=bool)
+        mask[error_peaks_idx] = False        
+        # Filter the array using the mask
+        peaks = peaks[mask]
+                        
     
     ########## Fit spectra and plot results ##########
     print('Beginning peak fitting')
