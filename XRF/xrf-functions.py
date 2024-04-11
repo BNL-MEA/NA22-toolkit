@@ -24,6 +24,7 @@ import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.patches as patches
+from plotly.subplots import make_subplots
 
 # X-ray database
 import xraydb as xdb
@@ -224,6 +225,7 @@ def arpls(y, lam=1e4, ratio=0.01, itermax=1000):
 
 ## Spectra Fitting Function
 def peak_fitting(x, y, peaks, window):
+    window = round(window/2)
     
     # Fit background data
     baseline_fit = arpls(y)
@@ -738,12 +740,12 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
     print('Beginning peak fitting')
     peak_fit, bkg_fit, peak_fit_params, r_squared = peak_fitting(energy_int, AOI_bkg_sub, peaks, dist)
     print('Peak fit r-squared value is:', r_squared)
-    # Find peaks in fitted data
-    peaks, properties = find_peaks(peak_fit-bkg_fit)
+    # # Find peaks in fitted data
+    # peaks, properties = find_peaks(peak_fit-bkg_fit)
     
-    # Label peaks
-    labels = []
-    for i in range(len(peaks)): labels.extend(['Peak '+str(i+1)])
+    # # Label peaks
+    # labels = []
+    # for i in range(len(peaks)): labels.extend(['Peak '+str(i+1)])
     
        
 
