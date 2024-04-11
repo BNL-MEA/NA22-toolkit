@@ -559,7 +559,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
                 fig1.add_vline(x = matched_peaks[i][3]/1000, line_width = 1.5, line_dash = 'dash', annotation_text = matched_peaks[i][1]+'_'+matched_peaks[i][2])
             fig1.show()
 
-
+    ## Remove peaks resulting from overfitting/noise in data 
     remove_peaks_q = input("Remove any peaks from consideration (yes or no)?")
     if remove_peaks_q.lower() == 'yes':
         user_input = input('Input comma-seperated list of peaks to be removed:')
