@@ -314,7 +314,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     max_energy = 1.2398e-9/compton_wavelength  # convert compton wavelength to energy and set the maximum energy to about the compton peak 
     energy = 0.01*np.arange(data.shape[2])
     min_idx = max([i for i, v in enumerate(energy) if v <= min_energy])
-    max_idx = min([i for i, v in enumerate(energy) if v >= max_energy])
+    max_idx = min([i for i, v in enumerate(energy) if v >= incident_energy])
 
 
     # Total summed spectrum
