@@ -608,8 +608,8 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     # fig1.add_trace(go.Scatter(x = energy_int, y = peak_fit, mode = 'lines', name ='AOI Spectra Fit'))
     # fig1.add_trace(go.Scatter(x = energy_int, y = bkg_fit, mode = 'lines', name = 'AOI Spectra Bkg Fit'))
 
-    # Plot points identified as peaks
-    fig1.add_trace(go.Scatter(x = energy_int[peaks], y = peak_fit[peaks],mode = 'markers+text', name = 'Peak fit', text = labels))
+    # # Plot points identified as peaks
+    # fig1.add_trace(go.Scatter(x = energy_int[peaks], y = peak_fit[peaks],mode = 'markers+text', name = 'Peak fit', text = labels))
 
 
     # Plot formatting
@@ -664,7 +664,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
         
         
 
-    return detector_2D_map_fig, fig1, peak_fit_params
+    return detector_2D_map_fig, fig1
 
 
 
@@ -843,8 +843,8 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
     # fig1.add_trace(go.Scatter(x = energy_int, y = peak_fit, mode = 'lines', name ='AOI Spectra Fit'))
     # fig1.add_trace(go.Scatter(x = energy_int, y = bkg_fit, mode = 'lines', name = 'AOI Spectra Bkg Fit'))
 
-    # Plot points identified as peaks
-    fig1.add_trace(go.Scatter(x = energy_int[peaks], y = peak_fit[peaks],mode = 'markers+text', name = 'Peak fit', text = labels))
+    # # Plot points identified as peaks
+    # fig1.add_trace(go.Scatter(x = energy_int[peaks], y = peak_fit[peaks],mode = 'markers+text', name = 'Peak fit', text = labels))
 
 
     # Plot formatting
@@ -899,7 +899,7 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
 
    
    
-    return detector_data, fig1, peak_fit_params, x_pos, y_pos, matched_peaks
+    return detector_data, fig1, x_pos, y_pos, matched_peaks
 
 
 
