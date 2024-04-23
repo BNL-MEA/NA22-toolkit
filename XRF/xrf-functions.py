@@ -428,33 +428,36 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     ######### Selecting background area based on PyXRF mappings ##########
 
     # # y-direction
-    user_input = input("Utilizing the detector map outputted, enter x values for area containing background spectra in slice format (e.g., '1:5'):")
-    detector_ROI_columns = input_to_slice(user_input)
-    detector_ROI_columns = slice(detector_ROI_columns.start+1, detector_ROI_columns.stop+1)
-    
-    # # x-direction
-    user_input = input("Utilizing the detector map outputted, enter y values for area containing background spectra in slice format (e.g., '1:5'):")
-    detector_ROI_rows = input_to_slice(user_input)
-    
+    user_input = input("Utilizing the detector map outputted, enter x values for area containing background spectra in slice format (e.g., '1:5'). Input 'none' to analyze whole detector:")
+    if user_input.lower() != 'none':
+        detector_ROI_columns = input_to_slice(user_input)
+        detector_ROI_columns = slice(detector_ROI_columns.start+1, detector_ROI_columns.stop+1)
+        
+        # # x-direction
+        user_input = input("Utilizing the detector map outputted, enter y values for area containing background spectra in slice format (e.g., '1:5'):")
+        detector_ROI_rows = input_to_slice(user_input)
+        
 
-    # identify background spectrum
-    bkg_data = data[detector_ROI_rows, detector_ROI_columns, :]
- 
- 
-   
-    # Sum background spectrum in selected area
-    background = np.sum(bkg_data, axis=(0,1))
-    background = background[min_idx:max_idx]
-    
+        # identify background spectrum
+        bkg_data = data[detector_ROI_rows, detector_ROI_columns, :]
+     
+     
+       
+        # Sum background spectrum in selected area
+        background = np.sum(bkg_data, axis=(0,1))
+        background = background[min_idx:max_idx]
+        
 
-    
-    # Background subtracted AOI
-    baseline = arpls(background) # Baseline of AOI spectrum
-    AOI_bkg_sub = AOI - background
-    AOI_bkg_sub[AOI_bkg_sub <= 0] = 0
+        
+        # Background subtracted AOI
+        baseline = arpls(background) # Baseline of AOI spectrum
+        AOI_bkg_sub = AOI - background
+        AOI_bkg_sub[AOI_bkg_sub <= 0] = 0
 
-    # add baseline to AOI spectrum
-    AOI_bkg_sub = AOI_bkg_sub + baseline
+        # add baseline to AOI spectrum
+        AOI_bkg_sub = AOI_bkg_sub + baseline
+    else:
+        AOI_bkg_sub = AOI
     
     
 
