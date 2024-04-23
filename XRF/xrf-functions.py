@@ -141,7 +141,7 @@ def identify_element_match(elements, peaks, tolerance):
                 matched_energy.append(energy_int)
                 line_name.extend(list(compress(line_name_int,idx_peak_element)))
                 rel_ints.extend(list(compress(rel_int,idx_peak_element)))
-    
+    print(matched_peaks, matched_element, line_name, matched_energy, rel_ints)
     
     # Output list of matched elements, the fluorescence line name, and the energy (eV)
     matched_fluor_lines = sorted([list(a) for a in zip(matched_peaks, matched_element, line_name, matched_energy, rel_ints)], key=lambda l:l[3])
