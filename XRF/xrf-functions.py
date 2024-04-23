@@ -516,7 +516,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
                 break
                 
             try: 
-                prom, tall, dist = map(int, user_input.split(','))
+                prom, tall, dist = map(float, user_input.split(','))
             except ValueError:
                 print("Invalid input. Please enter integers separated by a comma or 'no' to exit.")
                 continue
