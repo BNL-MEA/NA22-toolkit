@@ -75,7 +75,7 @@ def identify_element_match(elements, peaks, tolerance):
     
         for i in range(len(line_names)):
             fluor_energy = list(xray_line.values())[i][0] # output fluorscence energy of the selected element in the i-th index
-            intensity = list(xray_line.values())[i][2] # output relative intensity of the selected element in the i-th index
+            intensity = list(xray_line.values())[i][1] # output relative intensity of the selected element in the i-th index
             
     
             # find fluorscence line that matches to each peak
