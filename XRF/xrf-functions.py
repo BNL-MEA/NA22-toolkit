@@ -89,7 +89,7 @@ def identify_element_match(elements, peaks, tolerance):
                     line_name_int.append(line_names[i])
                     rel_int.append(float(intensity))
                     energy_match.append(float(fluor_energy))
-                    matched_peak.append(int(j+1))
+                    matched_peak.append(j+1)
     
     # element_emission_line = [item1 + '_' + item2 for item1, item2 in zip(identified_element, line_name_int)]
     
