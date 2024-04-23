@@ -125,12 +125,12 @@ def identify_element_match(elements, peaks, tolerance):
                 
                 line_names = list(compress(line_name_int,idx_peak_element))
                 line_name.append(line_names[0][:-1])
-                int = list(compress(rel_int,idx_peak_element))
+                intensities = list(compress(rel_int,idx_peak_element))
                 temp = 0
                 temp_int = 0 
                 for k in range(sum(idx_peak_element)):
-                    temp += energy_int[k]*int[k]
-                    temp_int += int[k]
+                    temp += energy_int[k]*intensities[k]
+                    temp_int += intensities[k]
                
                 matched_energy.append(temp/temp_int)
                 rel_ints.append(temp_int)
