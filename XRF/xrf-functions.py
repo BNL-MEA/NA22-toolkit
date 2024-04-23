@@ -319,8 +319,8 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
 
 
     # Total summed spectrum
-    sum_data = np.sum(data, axis = (0,1))
-    sum_data = sum_data[min_idx:max_idx]
+    avg_data = np.mean(data, axis = (0,1))
+    avg_data = avg_data[min_idx:max_idx]
     
     ########## Plotting whole detector view to identify AOI ##########
     temp = np.sum(data,axis = (2))
@@ -418,8 +418,8 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     x_int = x_pos[detector_ROI_rows]
  
    
-    # Sum spectrum in selected area
-    AOI = np.sum(AOI_data, axis=(0,1))
+    # Avg spectrum in selected area
+    AOI = np.mean(AOI_data, axis=(0,1))
     AOI = AOI[min_idx:max_idx]
     energy_int = energy[min_idx:max_idx]
     
@@ -443,8 +443,8 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
      
      
        
-        # Sum background spectrum in selected area
-        background = np.sum(bkg_data, axis=(0,1))
+        # Avg background spectrum in selected area
+        background = np.mean(bkg_data, axis=(0,1))
         background = background[min_idx:max_idx]
         
 
@@ -487,7 +487,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     fig1.add_trace(go.Scatter(x = energy_int, y = AOI_bkg_sub, mode = 'lines', name = 'AOI bkg subtracted'))
     
     # Plot total summed spectrum 
-    fig1.add_trace(go.Scatter(x = energy_int, y = sum_data, mode = 'lines', name = 'Summed Spectra'))
+    fig1.add_trace(go.Scatter(x = energy_int, y = avg_data, mode = 'lines', name = 'Summed Spectra'))
 
     if 'background' in vars():
         # Plot background spectrum        
@@ -539,7 +539,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
             fig1.add_trace(go.Scatter(x = energy_int, y = AOI_bkg_sub, mode = 'lines', name = 'AOI bkg subtracted'))
                         
             # Plot total summed spectrum 
-            fig1.add_trace(go.Scatter(x = energy_int, y = sum_data, mode = 'lines', name = 'Summed Spectra'))
+            fig1.add_trace(go.Scatter(x = energy_int, y = avg_data, mode = 'lines', name = 'Summed Spectra'))
             
             if 'background' in vars():
                 # Plot background spectrum
@@ -603,7 +603,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     fig1.add_trace(go.Scatter(x = energy_int, y = AOI_bkg_sub, mode = 'lines', name = 'AOI bkg subtracted'))
                 
     # Plot total summed spectrum 
-    fig1.add_trace(go.Scatter(x = energy_int, y = sum_data, mode = 'lines', name = 'Summed Spectra'))
+    fig1.add_trace(go.Scatter(x = energy_int, y = avg_data, mode = 'lines', name = 'Summed Spectra'))
     if 'background' in vars():
         # Plot background spectrum
         fig1.add_trace(go.Scatter(x = energy_int, y = background, mode = 'lines', name = 'Background Spectra'))
@@ -752,8 +752,8 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
     detector_2D_map_fig.show()
     
     ########## Total summed spectrum ##########
-    sum_data = np.sum(data, axis = (0,1))
-    sum_data = sum_data[min_idx:max_idx]
+    avg_data = np.mean(data, axis = (0,1))
+    avg_data = avg_data[min_idx:max_idx]
     
     
     ######### Setting area of interest ##########
@@ -762,7 +762,7 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
     
     
     # Sum spectrum in selected area
-    AOI = np.sum(AOI_data, axis=(0,1))
+    AOI = np.mean(AOI_data, axis=(0,1))
     AOI = AOI[min_idx:max_idx]
     energy_int = energy[min_idx:max_idx]
     
@@ -782,8 +782,8 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
         BKG_x = slice(BKG_x.start+1, BKG_x.stop+1)
         bkg_data = data[BKG_y, BKG_x, :]
         
-        # Sum background spectrum in selected area
-        background = np.sum(bkg_data, axis=(0,1))
+        # Avg background spectrum in selected area
+        background = np.mean(bkg_data, axis=(0,1))
         background = background[min_idx:max_idx]
         
 
@@ -841,7 +841,7 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
     fig1.add_trace(go.Scatter(x = energy_int, y = AOI_bkg_sub, mode = 'lines', name = 'AOI bkg subtracted'))
                 
     # Plot total summed spectrum 
-    fig1.add_trace(go.Scatter(x = energy_int, y = sum_data, mode = 'lines', name = 'Summed Spectra'))
+    fig1.add_trace(go.Scatter(x = energy_int, y = avg_data, mode = 'lines', name = 'Summed Spectra'))
     
     if 'background' in vars():
         # Plot background spectrum
@@ -1023,9 +1023,9 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
     min_idx = max([i for i, v in enumerate(energy) if v <= min_energy])    
     
     
-    # Total summed spectrum
-    standard_sum_data = np.sum(standard_data, axis = (0,1))
-    standard_sum_data = standard_sum_data[min_idx:max_idx]
+    # Total avg spectrum
+    standard_avg_data = np.mean(standard_data, axis = (0,1))
+    standard_avg_data = standard_avg_data[min_idx:max_idx]
     energy_int = energy[min_idx:max_idx]
     
     
@@ -1043,19 +1043,19 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
             print(f"Group '{group_name}' not found in the HDF5 file.")
     
     
-    # Total summed spectrum
-    background_sum_data = np.sum(background_data, axis = (0,1))
-    background_sum_data = background_sum_data[min_idx:max_idx]
+    # Total avg spectrum
+    background_avg_data = np.mean(background_data, axis = (0,1))
+    background_avg_data = background_avg_data[min_idx:max_idx]
     
     
     
     
     ########## Subtract background from standard #########
-    standard_data = standard_sum_data - background_sum_data
+    standard_data = standard_avg_data - background_avg_data
     standard_data[standard_data <= 0] = 0
     
     # define baseline of background and refining baseline by iterating arpls() function
-    baseline = arpls(background_sum_data)
+    baseline = arpls(background_avg_data)
     std_data_plus_baseline = standard_data + baseline
     
     
@@ -1083,14 +1083,14 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
         
         
     ########## Plot the results to ensure they make sense ##########
-    fig = go.Figure(data = go.Scatter(x = energy_int, y = standard_sum_data, mode = 'lines', name = 'Standard Spectra'), layout_xaxis_range = [min_energy,max_energy])
+    fig = go.Figure(data = go.Scatter(x = energy_int, y = standard_avg_data, mode = 'lines', name = 'Standard Spectra'), layout_xaxis_range = [min_energy,max_energy])
     fig.update_layout(title = 'Spectrum for ' + element[0] + ' Standard ' + '(' + standard_filename[-26:-13] + ')',
                        width = 1600,
                        height = 800,
                        font = dict(size = 20))
     
     # Plot Background spectrum
-    fig.add_trace(go.Scatter(x = energy_int, y = background_sum_data, mode = 'lines', name = 'Background Spectra'))
+    fig.add_trace(go.Scatter(x = energy_int, y = background_avg_data, mode = 'lines', name = 'Background Spectra'))
     
     # Plot bkg subtracted standard spectrum 
     fig.add_trace(go.Scatter(x = energy_int, y = standard_data, mode = 'lines', name = 'Background subtracted Standard Spectra'))
@@ -1129,11 +1129,11 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
     with h5py.File(open_air_filename, 'r') as file:
         open_air_data = file['xrfmap/detsum/counts'][:]
 
-    open_air_sum_data = np.sum(open_air_data, axis = (0,1))
-    open_air_sum_data = open_air_sum_data[min_idx:max_idx]
+    open_air_avg_data = np.mean(open_air_data, axis = (0,1))
+    open_air_avg_data = open_air_avg_data[min_idx:max_idx]
 
     ## Fit gaussian to region corresponding to element of interest
-    params = peak_fitting(energy_int,open_air_sum_data, peaks[peak_int_idx],10)[2]
+    params = peak_fitting(energy_int,open_air_avg_data, peaks[peak_int_idx],10)[2]
     standard_element_integral_params = peak_fitting(energy_int,std_data_plus_baseline, peaks[peak_int_idx], 10)[2]
     
     std_amp = standard_element_integral_params[::3]
