@@ -146,7 +146,7 @@ def identify_element_match(elements, peaks, tolerance):
     # Output list of matched elements, the fluorescence line name, and the energy (eV)
     matched_fluor_lines = sorted([list(a) for a in zip(matched_peaks, matched_element, line_name, matched_energy, rel_ints)], key=lambda l:l[3])
     
-    column_names =  ["Peak #", "Element", "Emission Line", "Energy (eV)", 'Rel. Int."]
+    column_names =  ["Peak #", "Element", "Emission Line", "Energy (eV)", "Rel. Int."]
     matched_df = pd.DataFrame(data = matched_fluor_lines, columns = column_names)
 
     
