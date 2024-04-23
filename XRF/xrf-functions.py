@@ -499,7 +499,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     fig1.add_trace(go.Scatter(x = energy_int[peaks], y = AOI_bkg_sub[peaks], mode = 'markers+text', name = 'Peak fit', text = labels))
     
     # Plot formatting
-    fig1.update_yaxes(title_text = 'Intensity (counts)', type = 'log', exponentformat = 'E')
+    fig1.update_yaxes(title_text = 'Intensity (counts)')
     fig1.update_xaxes(title_text = 'Energy (keV)')
     fig1.update_traces(line={'width': 5})
     fig1.show()
@@ -552,7 +552,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
             fig1.add_trace(go.Scatter(x = energy_int[peaks], y = AOI_bkg_sub[peaks],mode = 'markers+text', name = 'Peak fit', text = labels))
 
             # Plot formatting
-            fig1.update_yaxes(title_text = 'Intensity (counts)', type = 'log', exponentformat = 'E')
+            fig1.update_yaxes(title_text = 'Intensity (counts)')
             fig1.update_xaxes(title_text = 'Energy (keV)')
             fig1.update_traces(line={'width': 5})
 
@@ -620,7 +620,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
 
 
     # Plot formatting
-    fig1.update_yaxes(title_text = 'Intensity (counts)', type = 'log', exponentformat = 'E')
+    fig1.update_yaxes(title_text = 'Intensity (counts)')
     fig1.update_xaxes(title_text = 'Energy (keV)')
     fig1.update_traces(line={'width': 5})
 
@@ -859,7 +859,7 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
 
 
     # Plot formatting
-    fig1.update_yaxes(title_text = 'Intensity (counts)', type = 'log', exponentformat = 'E')
+    fig1.update_yaxes(title_text = 'Intensity (counts)')
     fig1.update_xaxes(title_text = 'Energy (keV)')
     fig1.update_traces(line={'width': 5})
 
@@ -1110,7 +1110,7 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
     
     
     # Plot formatting
-    fig.update_yaxes(title_text = 'Intensity (counts)', type = 'log', exponentformat = 'E')
+    fig.update_yaxes(title_text = 'Intensity (counts)')
     fig.update_xaxes(title_text = 'Energy (keV)')
     fig.update_traces(line={'width': 5})
     
