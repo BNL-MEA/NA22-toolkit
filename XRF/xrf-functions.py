@@ -488,11 +488,11 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     # Plot total summed spectrum 
     fig1.add_trace(go.Scatter(x = energy_int, y = sum_data, mode = 'lines', name = 'Summed Spectra'))
 
-    # Plot background spectrum
-    fig1.add_trace(go.Scatter(x = energy_int, y = background, mode = 'lines', name = 'Background Spectra'))
-
-    # Plot baseline spectrum
-    fig1.add_trace(go.Scatter(x = energy_int, y = baseline, mode = 'lines', name = 'Baseline Spectra'))
+    if background:
+        # Plot background spectrum        
+        fig1.add_trace(go.Scatter(x = energy_int, y = background, mode = 'lines', name = 'Background Spectra'))
+        # Plot baseline spectrum
+        fig1.add_trace(go.Scatter(x = energy_int, y = baseline, mode = 'lines', name = 'Baseline Spectra'))
     
     # Plot points identified as peaks
     fig1.add_trace(go.Scatter(x = energy_int[peaks], y = AOI_bkg_sub[peaks], mode = 'markers+text', name = 'Peak fit', text = labels))
@@ -539,12 +539,13 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
                         
             # Plot total summed spectrum 
             fig1.add_trace(go.Scatter(x = energy_int, y = sum_data, mode = 'lines', name = 'Summed Spectra'))
+            
+            if background:
+                # Plot background spectrum
+                fig1.add_trace(go.Scatter(x = energy_int, y = background, mode = 'lines', name = 'Background Spectra'))
 
-            # Plot background spectrum
-            fig1.add_trace(go.Scatter(x = energy_int, y = background, mode = 'lines', name = 'Background Spectra'))
-
-            # Plot baseline spectrum
-            fig1.add_trace(go.Scatter(x = energy_int, y = baseline, mode = 'lines', name = 'Baseline Spectra'))
+                # Plot baseline spectrum
+                fig1.add_trace(go.Scatter(x = energy_int, y = baseline, mode = 'lines', name = 'Baseline Spectra'))
     
             # Plot points identified as peaks
             fig1.add_trace(go.Scatter(x = energy_int[peaks], y = AOI_bkg_sub[peaks],mode = 'markers+text', name = 'Peak fit', text = labels))
@@ -602,12 +603,12 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
                 
     # Plot total summed spectrum 
     fig1.add_trace(go.Scatter(x = energy_int, y = sum_data, mode = 'lines', name = 'Summed Spectra'))
+    if background:
+        # Plot background spectrum
+        fig1.add_trace(go.Scatter(x = energy_int, y = background, mode = 'lines', name = 'Background Spectra'))
 
-    # Plot background spectrum
-    fig1.add_trace(go.Scatter(x = energy_int, y = background, mode = 'lines', name = 'Background Spectra'))
-
-    # Plot baseline spectrum
-    fig1.add_trace(go.Scatter(x = energy_int, y = baseline, mode = 'lines', name = 'Baseline Spectra'))
+        # Plot baseline spectrum
+        fig1.add_trace(go.Scatter(x = energy_int, y = baseline, mode = 'lines', name = 'Baseline Spectra'))
 
     # # Plot peak and background fits
     # fig1.add_trace(go.Scatter(x = energy_int, y = peak_fit, mode = 'lines', name ='AOI Spectra Fit'))
@@ -774,26 +775,28 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
     y_int = y_pos[AOI_y]
     x_int = x_pos[AOI_x]
     
+    if BKG_x:
+        ######### Setting background area ##########
+        # identify background spectrum
+        BKG_x = slice(BKG_x.start+1, BKG_x.stop+1)
+        bkg_data = data[BKG_y, BKG_x, :]
+        
+        # Sum background spectrum in selected area
+        background = np.sum(bkg_data, axis=(0,1))
+        background = background[min_idx:max_idx]
+        
 
-    ######### Setting background area ##########
-    # identify background spectrum
-    BKG_x = slice(BKG_x.start+1, BKG_x.stop+1)
-    bkg_data = data[BKG_y, BKG_x, :]
-    
-    # Sum background spectrum in selected area
-    background = np.sum(bkg_data, axis=(0,1))
-    background = background[min_idx:max_idx]
-    
+        # Background subtracted AOI
+        baseline = arpls(background) # Baseline of AOI spectrum
+        AOI_bkg_sub = AOI - background
+        AOI_bkg_sub[AOI_bkg_sub <= 0] = 0
 
-    # Background subtracted AOI
-    baseline = arpls(background) # Baseline of AOI spectrum
-    AOI_bkg_sub = AOI - background
-    AOI_bkg_sub[AOI_bkg_sub <= 0] = 0
+        
 
-    
-
-    # add baseline to AOI spectrum
-    AOI_bkg_sub = AOI_bkg_sub + baseline
+        # add baseline to AOI spectrum
+        AOI_bkg_sub = AOI_bkg_sub + baseline
+    else:
+        AOI_bkg_sub = AOI
     
 
     ########## Find peaks in data using parameter thresholds ##########
@@ -838,12 +841,13 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
                 
     # Plot total summed spectrum 
     fig1.add_trace(go.Scatter(x = energy_int, y = sum_data, mode = 'lines', name = 'Summed Spectra'))
+    
+    if background:
+        # Plot background spectrum
+        fig1.add_trace(go.Scatter(x = energy_int, y = background, mode = 'lines', name = 'Background Spectra'))
 
-    # Plot background spectrum
-    fig1.add_trace(go.Scatter(x = energy_int, y = background, mode = 'lines', name = 'Background Spectra'))
-
-    # Plot baseline spectrum
-    fig1.add_trace(go.Scatter(x = energy_int, y = baseline, mode = 'lines', name = 'Baseline Spectra'))
+        # Plot baseline spectrum
+        fig1.add_trace(go.Scatter(x = energy_int, y = baseline, mode = 'lines', name = 'Baseline Spectra'))
 
     # Plot peak and background fits
     # fig1.add_trace(go.Scatter(x = energy_int, y = peak_fit, mode = 'lines', name ='AOI Spectra Fit'))
