@@ -132,7 +132,7 @@ def identify_element_match(elements, peaks, tolerance):
                     temp += energy_int[k]*intensities[k]
                     temp_int += intensities[k]
                
-                matched_energy.append([temp/temp_int])
+                matched_energy.append(temp/temp_int)
                 rel_ints.append(temp_int)
             if sum(idx_peak_element) == 1:
                 matched_peaks.append(i)
