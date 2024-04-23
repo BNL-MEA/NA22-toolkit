@@ -540,7 +540,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
             # Plot total summed spectrum 
             fig1.add_trace(go.Scatter(x = energy_int, y = sum_data, mode = 'lines', name = 'Summed Spectra'))
             
-            if background:
+            if 'background' in vars():
                 # Plot background spectrum
                 fig1.add_trace(go.Scatter(x = energy_int, y = background, mode = 'lines', name = 'Background Spectra'))
 
@@ -603,7 +603,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
                 
     # Plot total summed spectrum 
     fig1.add_trace(go.Scatter(x = energy_int, y = sum_data, mode = 'lines', name = 'Summed Spectra'))
-    if 'background' in vars()::
+    if 'background' in vars():
         # Plot background spectrum
         fig1.add_trace(go.Scatter(x = energy_int, y = background, mode = 'lines', name = 'Background Spectra'))
 
