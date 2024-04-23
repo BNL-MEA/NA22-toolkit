@@ -359,43 +359,44 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
         detector_2D_map_fig.show()
 
     # plotting detector mapping highlighting location of each sample_element
-    element_2D_map_fig = make_subplots(rows= len(sample_elements), cols=1, subplot_titles = sample_elements)
-    for count,element in enumerate(sample_elements): # loop through each element in the sample
-        xray_data = list(xdb.xray_lines(element).values()) # find the xray data for each sample element
-        element_energy = []
-        for _,line in enumerate(xray_data): # loop through each xray line in each sample element
-            if line[1] >= 0.1 and line[0]< max_energy*1000: # if the line has adequete intensity and below max_energy append to list
-                element_energy = np.append(element_energy,[line[0],line[1],line[2]])
-    
-        element_energy = element_energy.reshape((int(len(element_energy)/3),3)) # reshape to be n x 3 array
-        element_energy = np.array([row for row in element_energy if row[2] == element_energy[0,2]]) # select only the first edge available
-        max_idx_element = np.argmax(element_energy[:,1]) # find maximum intensity of all edge lines
+    if sample_elements:
+        element_2D_map_fig = make_subplots(rows= len(sample_elements), cols=1, subplot_titles = sample_elements)
+        for count,element in enumerate(sample_elements): # loop through each element in the sample
+            xray_data = list(xdb.xray_lines(element).values()) # find the xray data for each sample element
+            element_energy = []
+            for _,line in enumerate(xray_data): # loop through each xray line in each sample element
+                if line[1] >= 0.1 and line[0]< max_energy*1000: # if the line has adequete intensity and below max_energy append to list
+                    element_energy = np.append(element_energy,[line[0],line[1],line[2]])
+        
+            element_energy = element_energy.reshape((int(len(element_energy)/3),3)) # reshape to be n x 3 array
+            element_energy = np.array([row for row in element_energy if row[2] == element_energy[0,2]]) # select only the first edge available
+            max_idx_element = np.argmax(element_energy[:,1]) # find maximum intensity of all edge lines
 
-        # setting up an energy range of interest surrounding the highest intensity line i nthe first edge available
-        energy_range_minima = round((float(element_energy[max_idx_element,0]) - 500)/10) 
-        energy_range_maxima = round((float(element_energy[max_idx_element,0]) + 500)/10)
-        energy_range = slice(energy_range_minima, energy_range_maxima)
+            # setting up an energy range of interest surrounding the highest intensity line i nthe first edge available
+            energy_range_minima = round((float(element_energy[max_idx_element,0]) - 500)/10) 
+            energy_range_maxima = round((float(element_energy[max_idx_element,0]) + 500)/10)
+            energy_range = slice(energy_range_minima, energy_range_maxima)
 
-        # extracting this energy range from the hdf file data
-        element_det_data = data[:, :, energy_range]
-        summed_element_det_data = np.sum(element_det_data, axis=(2))
+            # extracting this energy range from the hdf file data
+            element_det_data = data[:, :, energy_range]
+            summed_element_det_data = np.sum(element_det_data, axis=(2))
 
-        # plotting detector map highlighting element of interest's signal
-        element_2D_map_fig.add_trace(go.Heatmap(z = summed_element_det_data), row = count + 1, col = 1 )
-  
+            # plotting detector map highlighting element of interest's signal
+            element_2D_map_fig.add_trace(go.Heatmap(z = summed_element_det_data), row = count + 1, col = 1 )
+      
 
-    element_2D_map_fig.update_traces(dict(showscale=False, 
-                                          coloraxis=None, 
-                                          colorscale='Viridis'), 
-                                     selector={'type':'heatmap'})
-    
+        element_2D_map_fig.update_traces(dict(showscale=False, 
+                                              coloraxis=None, 
+                                              colorscale='Viridis'), 
+                                         selector={'type':'heatmap'})
+        
 
-    element_2D_map_fig.update_layout(width = 425, height = len(sample_elements)*500, 
-                                     font = dict(size = 20),
-                                     xaxis = dict(title = 'X-axis'),
-                                     yaxis = dict(title = 'Y-axis'))
-    
-    element_2D_map_fig.show()
+        element_2D_map_fig.update_layout(width = 425, height = len(sample_elements)*500, 
+                                         font = dict(size = 20),
+                                         xaxis = dict(title = 'X-axis'),
+                                         yaxis = dict(title = 'Y-axis'))
+        
+        element_2D_map_fig.show()
     
 
 
