@@ -883,6 +883,7 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
     # identify fluorescent line energy that most closely matches the determined peaks
     tolerance = 1.5 # allowed difference in percent
     matched_peaks, _ = identify_element_match(elements, energy_int[peaks]*1000, tolerance)
+    print(matched_peaks)
     # Plotting vertical lines for matched peaks and labeled with element symbol
     for i in range(len(matched_peaks)):
         fig1.add_vline(x = matched_peaks[i][3]/1000, line_width = 1.5, line_dash = 'dash', annotation_text = matched_peaks[i][1]+'_'+matched_peaks[i][2])
