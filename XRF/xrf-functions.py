@@ -66,6 +66,7 @@ def input_to_slice(user_input):
 def identify_element_match(elements, peaks, tolerance):
     line_name_int = []
     identified_element = []
+    rel_int = []
     energy_match = []
     matched_peak = []
     for element in elements:
@@ -74,6 +75,8 @@ def identify_element_match(elements, peaks, tolerance):
     
         for i in range(len(line_names)):
             fluor_energy = list(xray_line.values())[i][0] # output fluorscence energy of the selected element in the i-th index
+            rel_int = list(xray_line.values())[i][2] # output relative intensity of the selected element in the i-th index
+            
     
             # find fluorscence line that matches to each peak
             for j, peak in enumerate(peaks):
@@ -84,26 +87,29 @@ def identify_element_match(elements, peaks, tolerance):
                 if peak_diff <= tolerance:
                     identified_element.append(element)
                     line_name_int.append(line_names[i])
+                    rel_int.append(float(rel_int))
                     energy_match.append(float(fluor_energy))
                     matched_peak.append(int(j+1))
     
     # element_emission_line = [item1 + '_' + item2 for item1, item2 in zip(identified_element, line_name_int)]
     
     # Output list of matched elements, the fluorescence line name, and the energy (eV)
-    matched_fluor_lines = sorted([list(a) for a in zip(matched_peak, identified_element, line_name_int, energy_match)])
+    matched_fluor_lines = sorted([list(a) for a in zip(matched_peak, identified_element, line_name_int, energy_match, rel_int)])
     
-    column_names =  ["Peak #", "Element", "Emission Line", "Energy (eV)"]
+    column_names =  ["Peak #", "Element", "Emission Line", "Energy (eV)", "Rel. Int."]
     matched_df = pd.DataFrame(data = matched_fluor_lines, columns = column_names)
     
     # making list in the same order as dataframe
     line_name_int = matched_df['Emission Line'].tolist()
     energy_match = matched_df['Energy (eV)'].tolist()
+    rel_int_list = matched_df['Rel. Int.'].tolist()
     
     # Removing repeats and averaging fluor line of elements with same emission lines (i.e. averaging Ce_Ka1, Ce_Ka2, etc. to make single peak representing Ce_Ka)
     unique_peak = matched_df['Peak #'].unique()
     matched_peaks = []
     matched_energy = []
     line_name = []
+    rel_ints = []
     matched_element = []
     for i in unique_peak:
         idx_peak = matched_df['Peak #'] == i
@@ -116,21 +122,31 @@ def identify_element_match(elements, peaks, tolerance):
                 matched_peaks.append(i)
                 matched_element.append(j)
                 energy_int = list(compress(energy_match,idx_peak_element))
-                matched_energy.append(np.mean(energy_int))
+                
                 line_names = list(compress(line_name_int,idx_peak_element))
                 line_name.append(line_names[0][:-1])
+                int = list(compress(rel_int,idx_peak_element))
+                temp = 0
+                temp_int = 0 
+                for k in range(sum(idx_peak_element)):
+                    temp += energy_int[k]*int[k]
+                    temp_int += int[k]
+               
+                matched_energy.append(temp/temp_int)
+                rel_ints.append(temp_int)
             if sum(idx_peak_element) == 1:
                 matched_peaks.append(i)
                 matched_element.append(j)
                 energy_int = list(compress(energy_match,idx_peak_element))
-                matched_energy.append(np.mean(energy_int))
+                matched_energy.append(energy_int)
                 line_name.extend(list(compress(line_name_int,idx_peak_element)))
+                rel_ints.extend(list(compress(rel_int,idx_peak_element)))
     
     
     # Output list of matched elements, the fluorescence line name, and the energy (eV)
-    matched_fluor_lines = sorted([list(a) for a in zip(matched_peaks, matched_element, line_name, matched_energy)], key=lambda l:l[3])
+    matched_fluor_lines = sorted([list(a) for a in zip(matched_peaks, matched_element, line_name, matched_energy, rel_ints)], key=lambda l:l[3])
     
-    column_names =  ["Peak #", "Element", "Emission Line", "Energy (eV)"]
+    column_names =  ["Peak #", "Element", "Emission Line", "Energy (eV)", 'Rel. Int."]
     matched_df = pd.DataFrame(data = matched_fluor_lines, columns = column_names)
 
     
