@@ -400,7 +400,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     
 
 
-    ######### Selecting area of interest based on PyXRF mappings ##########
+    ######### Selecting area of interest based on XRF mappings ##########
     # # y-direction
     user_input = input("Utilizing the detector map outputted, enter x values for area of interest (AOI) in slice format (e.g., '1:5'):")
     detector_ROI_columns = input_to_slice(user_input)
@@ -457,6 +457,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
         # add baseline to AOI spectrum
         AOI_bkg_sub = AOI_bkg_sub + baseline
     else:
+   
         AOI_bkg_sub = AOI
     
     
@@ -488,7 +489,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     # Plot total summed spectrum 
     fig1.add_trace(go.Scatter(x = energy_int, y = sum_data, mode = 'lines', name = 'Summed Spectra'))
 
-    if 'background' in vars()::
+    if 'background' in vars():
         # Plot background spectrum        
         fig1.add_trace(go.Scatter(x = energy_int, y = background, mode = 'lines', name = 'Background Spectra'))
         # Plot baseline spectrum
