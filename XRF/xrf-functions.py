@@ -572,7 +572,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
 
             ########## Identify elements ##########
             # identify fluorescent line energy that most closely matches the determined peaks
-            tolerance = 1.5 # allowed difference in percent
+            tolerance = 1 # allowed difference in percent
             elements = background_elements + sample_elements
             matched_peaks, _ = identify_element_match(elements, energy_int[peaks]*1000, tolerance)
             # Plotting vertical lines for matched peaks and labeled with element symbol
@@ -640,7 +640,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
 
     ########## Identify elements ##########
     # identify fluorescent line energy that most closely matches the determined peaks
-    tolerance = 1.5 # allowed difference in percent
+    tolerance = 1 # allowed difference in percent
     matched_peaks, _ = identify_element_match(elements, energy_int[peaks]*1000, tolerance)
     # Plotting vertical lines for matched peaks and labeled with element symbol
     for i in range(len(matched_peaks)):
@@ -879,7 +879,7 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
 
     ########## Identify elements ##########
     # identify fluorescent line energy that most closely matches the determined peaks
-    tolerance = 1.5 # allowed difference in percent
+    tolerance = 1 # allowed difference in percent
     matched_peaks, _ = identify_element_match(elements, energy_int[peaks]*1000, tolerance)
     # Plotting vertical lines for matched peaks and labeled with element symbol
     for i in range(len(matched_peaks)):
@@ -1083,7 +1083,7 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
     
     ########## Find element of interest ##########
     # identify fluorescent line energy that most closely matches the determined peaks
-    tolerance = 1.5 # allowed difference in percent
+    tolerance = 1 # allowed difference in percent
     matched_peaks, _ = identify_element_match(element, energy_int[peaks]*1000, tolerance)
     
     # find peak belonging to element of interest
