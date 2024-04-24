@@ -61,10 +61,11 @@ def input_to_slice(user_input):
 #     1. elements: string of elements supplied by user consisting of those expected in the sample
 #     2. peaks: list of energies corresponding to each peak (eV)
 #     3. tolerance: percentage of acceptable difference between the database x-ray fluorescence energy and the supplied peak energies
+#     4. incident_energy: energy of impinging xray beam (eV)
 # * Outputs: 
 #     1. matched_fluor_lines: list of matched fluorescence lines showing the peak name, the element, the fluorescence line name, the energy (eV), and the relative intensity
 #     2. matched_df: pandas dataframe of the matches
-def identify_element_match(elements, peaks, tolerance):
+def identify_element_match(elements, peaks, tolerance, incident_energy):
     line_name_int = []
     identified_element = []
     peak_intensity = [] 
@@ -76,7 +77,6 @@ def identify_element_match(elements, peaks, tolerance):
     
         for i in range(len(line_names)):
             fluor_energy = list(xray_line.values())[i][0] # output fluorscence energy of the selected element in the i-th index
-            rel_intensity = list(xray_line.values())[i][1] # output relative intensity of the selected element in the i-th index
     
             # find fluorscence line that matches to each peak
             for j, peak in enumerate(peaks):
@@ -88,27 +88,23 @@ def identify_element_match(elements, peaks, tolerance):
                     identified_element.append(element)
                     line_name_int.append(line_names[i])
                     energy_match.append(float(fluor_energy))
-                    peak_intensity.append(float(rel_intensity))
                     matched_peak.append(int(j+1))
     
     # element_emission_line = [item1 + '_' + item2 for item1, item2 in zip(identified_element, line_name_int)]
     
     # Output list of matched elements, the fluorescence line name, and the energy (eV)
-    matched_fluor_lines = sorted([list(a) for a in zip(matched_peak, identified_element, line_name_int, energy_match, peak_intensity)])
+    matched_fluor_lines = sorted([list(a) for a in zip(matched_peak, identified_element, line_name_int, energy_match)])
     
-    column_names =  ["Peak #", "Element", "Emission Line", "Energy (eV)", "Relative Intensity"]
+    column_names =  ["Peak #", "Element", "Emission Line", "Energy (eV)"]
     matched_df = pd.DataFrame(data = matched_fluor_lines, columns = column_names)
     
     # making list in the same order as dataframe
     line_name_int = matched_df['Emission Line'].tolist()
     energy_match = matched_df['Energy (eV)'].tolist()
-    rel_intensity = matched_df["Relative Intensity"].tolist()
     
     # Removing repeats and averaging fluor line of elements with same emission lines (i.e. averaging Ce_Ka1, Ce_Ka2, etc. to make single peak representing Ce_Ka)
     unique_peak = matched_df['Peak #'].unique()
     matched_peaks = []
-    matched_energy = []
-    rel_int = []
     line_name = []
     matched_element = []
     for i in unique_peak:
@@ -121,28 +117,27 @@ def identify_element_match(elements, peaks, tolerance):
             if sum(idx_peak_element) > 1: 
                 matched_peaks.append(i)
                 matched_element.append(j)
-                energy_int = list(compress(energy_match,idx_peak_element))
-                intensity = list(compress(rel_intensity,idx_peak_element))
                 line_names = list(compress(line_name_int,idx_peak_element))
-                line_name.append(line_names[0][:-1])
-                temp_e = 0
-                temp_int = 0
-                for k in range(sum(idx_peak_element)):
-                    temp_e += energy_int[k]*intensity[k]
-                    temp_int += intensity[k]
-                matched_energy.append(float(temp_e/temp_int))
-                rel_int.append(float(temp_int))
+                line_name.append(line_names[0][:-1])                
             if sum(idx_peak_element) == 1:
                 matched_peaks.append(i)
                 matched_element.append(j)
-                energy_int = list(compress(energy_match,idx_peak_element))
-                matched_energy.append(np.mean(energy_int))
-                rel_int.extend(list(compress(rel_intensity,idx_peak_element)))
                 line_name.extend(list(compress(line_name_int,idx_peak_element)))
     
-    
+    fluor_list = list(zip(matched_peaks, matched_element, line_name))
+
+    fluor_energy = [] # weighted energy by probability
+    rel_int = [] # probability of fluorescence line
+    for row in fluor_list:
+        data = xdb.fluor_yield(row[1],row[2][0],row[2],incident_energy)
+        fluor_energy.append(data[1])
+        rel_int.append(data[2])
+        
     # Output list of matched elements, the fluorescence line name, and the energy (eV)
-    matched_fluor_lines = sorted([list(a) for a in zip(matched_peaks, matched_element, line_name, matched_energy, rel_int)], key=lambda l:l[3])
+    matched_fluor_lines = sorted([list(a) for a in zip(matched_peaks, matched_element, line_name, fluor_energy, rel_int)], key=lambda l:l[3])
+    
+        
+        
     
     column_names =  ["Peak #", "Element", "Emission Line", "Energy (eV)", "Relative Intensity"]
     matched_df = pd.DataFrame(data = matched_fluor_lines, columns = column_names)
@@ -574,7 +569,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
             # identify fluorescent line energy that most closely matches the determined peaks
             tolerance = 1.5 # allowed difference in percent
             elements = background_elements + sample_elements
-            matched_peaks, _ = identify_element_match(elements, energy_int[peaks]*1000, tolerance)
+            matched_peaks, _ = identify_element_match(elements, energy_int[peaks]*1000, tolerance,incident_energy*1000)
             # Plotting vertical lines for matched peaks and labeled with element symbol
             for i in range(len(matched_peaks)):
                 fig1.add_vline(x = matched_peaks[i][3]/1000, line_width = 1.5, line_dash = 'dash', annotation_text = matched_peaks[i][1]+'_'+matched_peaks[i][2])
@@ -880,7 +875,7 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
     ########## Identify elements ##########
     # identify fluorescent line energy that most closely matches the determined peaks
     tolerance = 1.5 # allowed difference in percent
-    matched_peaks, _ = identify_element_match(elements, energy_int[peaks]*1000, tolerance)
+    matched_peaks, _ = identify_element_match(elements, energy_int[peaks]*1000, tolerance,incident_energy*1000)
     # Plotting vertical lines for matched peaks and labeled with element symbol
     for i in range(len(matched_peaks)):
         fig1.add_vline(x = matched_peaks[i][3]/1000, line_width = 1.5, line_dash = 'dash', annotation_text = matched_peaks[i][1]+'_'+matched_peaks[i][2])
