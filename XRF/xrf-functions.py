@@ -468,7 +468,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
         AOI_bkg_sub[AOI_bkg_sub <= 0] = 0
 
         # add baseline to AOI spectrum
-        AOI_bkg_sub = AOI_bkg_sub + baseline
+        AOI_bkg_sub = AOI_bkg_sub #+ baseline
     else:
    
         AOI_bkg_sub = AOI
