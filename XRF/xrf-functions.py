@@ -31,6 +31,50 @@ from matplotlib.cm import get_cmap
 import xraydb as xdb
 
 
+########## Combine lists and remove duplicates ##########
+# function primarily used to combine lists of identified elements in spectra into a single list
+# * Inputs
+#     1. N number of lists all with the same dimensions (Mx5)
+# * Outputs
+#     2. processed_list: Mx5 dimensional list containing all identified elements with no duplicates
+def compile_and_remove_duplicates(*lists):
+    """
+    Compile multiple lists into a single list and remove duplicate rows across all lists.
+
+    Args:
+        *lists: Variable number of lists.
+
+    Returns:
+        A list with unique rows across all input lists, with an added index column,
+        without the original first column, and sorted based on the third column.
+    """
+    combined_list = []
+    for sublist in lists:
+        combined_list.extend(sublist)
+
+    # Remove the original first column from each sublist
+    without_first_column = [row[1:] for row in combined_list]
+
+    unique_set = set()
+    unique_list = []
+
+    for row in without_first_column:
+        first_two_values = tuple(row[:2])
+       
+        if first_two_values not in unique_set:
+            unique_set.add(first_two_values)
+            unique_list.append(row)
+
+    
+    # Sort based on the third column (index 2)
+    sorted_unique_list = sorted(unique_list, key=lambda x: x[2])      
+    
+    # Add an index column
+    processed_list = [[idx] + row for idx, row in enumerate(sorted_unique_list, start=1)]
+    
+    return processed_list
+    
+
 
 
 ########## Handle user inputs ##########
@@ -149,6 +193,7 @@ def identify_element_match(elements, peaks, tolerance):
 
     
     return matched_fluor_lines, matched_df
+
 
 
 ########## Defining Gaussians ##########
