@@ -107,11 +107,12 @@ def input_to_slice(user_input):
         
         
 ########## Smooth Data ##########
-# Smooths data using the Savitzky-Golay filter which increases data precision without distorting
-# signal tendency. fits successive sub-sets of adjacent data points with a low degree polynomial 
-# via linear least squares. The code automatically determines the optimum polynomial degree and 
-# data window based on the data provided. For application on fluorescence data it's helpful to 
-# convert y to log scale prior to entering in algorithm.
+# Denoises data using a wavelet transform. Then smooths data using the Savitzky-Golay filter 
+# which increases data precision without distorting signal tendency. fits successive sub-sets
+# of adjacent data points with a low degree polynomial via linear least squares. The code 
+# automatically determines the optimum polynomial degree and data window based on the data 
+# provided. For application on fluorescence data it's helpful to convert y to log scale prior
+# to entering in algorithm.
 # Inputs: 
 #   1. x : x data in 1D np.array
 #   2. y : y data in 1D np.array 
