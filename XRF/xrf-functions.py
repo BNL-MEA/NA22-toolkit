@@ -30,6 +30,12 @@ from matplotlib.cm import get_cmap
 # X-ray database
 import xraydb as xdb
 
+# Smoothing
+from scipy.signal import savgol_filter
+from sklearn.model_selection import KFold
+from sklearn.metrics import mean_squared_error
+
+
 
 ########## Combine lists and remove duplicates ##########
 # function primarily used to combine lists of identified elements in spectra into a single list
@@ -97,6 +103,57 @@ def input_to_slice(user_input):
         return slice(start, stop)
     except ValueError:
         print("Invalid input. Please use the format 'start:stop'.")
+        
+        
+        
+########## Smooth Data ##########
+# Smooths data using the Savitzky-Golay filter which increases data precision without distorting
+# signal tendency. fits successive sub-sets of adjacent data points with a low degree polynomial 
+# via linear least squares. The code automatically determines the optimum polynomial degree and 
+# data window based on the data provided. For application on fluorescence data it's helpful to 
+# convert y to log scale prior to entering in algorithm.
+# Inputs: 
+#   1. x : x data in 1D np.array
+#   2. y : y data in 1D np.array 
+# Outputs:
+#   1. smoothed_y : smoothed y data as 1D np.array
+ def data_smoothing(x,y):
+    # Define ranges of window sizes and polynomial degrees to try
+    window_sizes = range(5, 30, 2)  # Adjust as needed
+    polynomial_degrees = range(2, 5)  # Adjust as needed
+    
+    # Perform k-fold cross-validation to choose optimal window size and polynomial degree
+    kf = KFold(n_splits=5, shuffle=True)
+    best_mse = float('inf')
+    best_window_size = None
+    best_poly_degree = None
+    
+    for window_size in window_sizes:
+        for poly_degree in polynomial_degrees:
+            fold_mse = 0
+            for train_index, val_index in kf.split(x):
+                x_train, x_val = x[train_index], x[val_index]
+                y_train, y_val = y[train_index], y[val_index]
+                
+                # Apply Savitzky-Golay filter with current window size and polynomial degree
+                smoothed_y = savgol_filter(y_train, window_size, poly_degree)
+                
+                # Evaluate smoothed data on validation set
+                val_predictions = np.interp(x_val, x_train, smoothed_y)
+                fold_mse += mean_squared_error(y_val, val_predictions)
+            
+            fold_avg_mse = fold_mse / kf.n_splits
+            
+            # Update best parameters if current ones are better
+            if fold_avg_mse < best_mse:
+                best_mse = fold_avg_mse
+                best_window_size = window_size
+                best_poly_degree = poly_degree
+    
+    # Apply Savitzky-Golay filter with the best parameters
+    smoothed_y = savgol_filter(y, best_window_size, best_poly_degree)
+
+    return smoothed_y
 
 
 ########## Identify Elements ##########
