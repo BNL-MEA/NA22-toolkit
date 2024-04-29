@@ -31,6 +31,7 @@ from matplotlib.cm import get_cmap
 import xraydb as xdb
 
 # Smoothing
+import pywt
 from scipy.signal import savgol_filter
 from sklearn.model_selection import KFold
 from sklearn.metrics import mean_squared_error
