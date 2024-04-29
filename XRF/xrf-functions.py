@@ -583,7 +583,8 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     prom = 70
     tall = 70
     dist = 10
-    peaks, properties = find_peaks(AOI_bkg_sub, prominence = prom, height = tall, distance = dist)
+    y_smoothed = np.exp(data_smoothing(energy_int, np.log(AOI_bkg_sub)))
+    peaks, properties = find_peaks(y_smoothed, prominence = prom, height = tall, distance = dist)
 
    
     
@@ -638,7 +639,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
                 continue
             
             # Find peaks in data
-            peaks, properties = find_peaks(AOI_bkg_sub, prominence = prom, height = tall, distance = dist)
+            peaks, properties = find_peaks(y_smoothed, prominence = prom, height = tall, distance = dist)
             
             # Label peaks
             labels = []
@@ -917,7 +918,8 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
     
 
     ########## Find peaks in data using parameter thresholds ##########
-    peaks, properties = find_peaks(AOI_bkg_sub, prominence = prom, height = height, distance = dist)
+    y_smoothed = np.exp(data_smoothing(energy_int, np.log(AOI_bkg_sub)))
+    peaks, properties = find_peaks(y_smoothed, prominence = prom, height = height, distance = dist)
      # Label peaks
     labels = []
     for i in range(len(peaks)): labels.extend(['Peak '+str(i+1)])    
@@ -1177,7 +1179,8 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
     
     ########## Identify Peaks ##########
     # find peaks
-    peaks, _ = find_peaks(std_data_plus_baseline, distance = 10)
+    y_smoothed = np.exp(data_smoothing(energy_int, np.log(std_data_plus_baseline)))
+    peaks, _ = find_peaks(y_smoothed, distance = 10)
     
     # Label peaks
     labels = []
