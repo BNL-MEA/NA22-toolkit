@@ -629,7 +629,8 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     tall = 70
     dist = 10
     y_smoothed = np.exp(denoise_and_smooth_data(energy_int, np.log(AOI_bkg_sub)))
-    peaks, properties = find_peaks(y_smoothed, prominence = prom, height = tall, distance = dist)
+    smooth_sample_baseline = arpls(y_smoothed)
+    peaks, properties = find_peaks(y_smoothed - smooth_sample_baseline, prominence = prom, height = tall, distance = dist)
 
    
     
@@ -649,19 +650,22 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     fig1.add_trace(go.Scatter(x = energy_int, y = AOI_bkg_sub, mode = 'lines', name = 'AOI bkg subtracted'))
     
     # Plot total summed spectrum 
-    fig1.add_trace(go.Scatter(x = energy_int, y = avg_data, mode = 'lines', name = 'Summed Spectra'))
+    fig1.add_trace(go.Scatter(x = energy_int, y = avg_data, mode = 'lines', name = 'Summed Spectrum'))
 
     if 'background' in vars():
         # Plot background spectrum        
-        fig1.add_trace(go.Scatter(x = energy_int, y = background, mode = 'lines', name = 'Background Spectra'))
+        fig1.add_trace(go.Scatter(x = energy_int, y = background, mode = 'lines', name = 'Background Spectrum'))
         # Plot baseline spectrum
-        fig1.add_trace(go.Scatter(x = energy_int, y = baseline, mode = 'lines', name = 'Baseline Spectra'))
+        fig1.add_trace(go.Scatter(x = energy_int, y = baseline, mode = 'lines', name = 'Baseline Spectrum'))
     
     # Plot points identified as peaks
     fig1.add_trace(go.Scatter(x = energy_int[peaks], y = AOI_bkg_sub[peaks], mode = 'markers+text', name = 'Peak fit', text = labels))
     
     # Plot smoothed spectrum 
-    fig1.add_trace(go.Scatter(x = energy_int, y = y_smoothed, mode = 'lines', name = 'Smoothed Spectra'))
+    fig1.add_trace(go.Scatter(x = energy_int, y = y_smoothed, mode = 'lines', name = 'Smoothed Spectrum'))
+    
+    # Plot smoothed spectrum baseline
+    fig1.add_trace(go.Scatter(x = energy_int, y = smooth_sample_baseline, mode = 'lines', name = 'Smoothed Spectrum Baseline'))
     
     # Plot formatting
     fig1.update_yaxes(title_text = 'Intensity (counts)', type = 'log', exponentformat = 'e')
@@ -687,7 +691,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
                 continue
             
             # Find peaks in data
-            peaks, properties = find_peaks(y_smoothed, prominence = prom, height = tall, distance = dist)
+            peaks, properties = find_peaks(y_smoothed - smooth_sample_baseline, prominence = prom, height = tall, distance = dist)
             
             # Label peaks
             labels = []
@@ -718,6 +722,9 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
             
             # Plot smoothed spectrum 
             fig1.add_trace(go.Scatter(x = energy_int, y = y_smoothed, mode = 'lines', name = 'Smoothed Spectra'))
+            
+            # Plot smoothed spectrum baseline
+            fig1.add_trace(go.Scatter(x = energy_int, y = smooth_sample_baseline, mode = 'lines', name = 'Smoothed Spectrum Baseline'))
 
             # Plot formatting
             fig1.update_yaxes(title_text = 'Intensity (counts)', type = 'log', exponentformat = 'e')
@@ -970,7 +977,8 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
 
     ########## Find peaks in data using parameter thresholds ##########
     y_smoothed = np.exp(denoise_and_smooth_data(energy_int, np.log(AOI_bkg_sub)))
-    peaks, properties = find_peaks(y_smoothed, prominence = prom, height = height, distance = dist)
+    smooth_sample_baseline = arpls(y_smoothed)
+    peaks, properties = find_peaks(y_smoothed - smooth_sample_baseline, prominence = prom, height = height, distance = dist)
      # Label peaks
     labels = []
     for i in range(len(peaks)): labels.extend(['Peak '+str(i+1)])    
@@ -1231,7 +1239,8 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
     ########## Identify Peaks ##########
     # find peaks
     y_smoothed = np.exp(denoise_and_smooth_data(energy_int, np.log(AOI_bkg_sub)))
-    peaks, _ = find_peaks(y_smoothed, distance = 10)
+    smooth_sample_baseline = arpls(y_smoothed)
+    peaks, _ = find_peaks(y_smoothed - smooth_sample_baseline, distance = 10)
     
     # Label peaks
     labels = []
