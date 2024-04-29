@@ -118,7 +118,7 @@ def input_to_slice(user_input):
 #   2. y : y data in 1D np.array 
 # Outputs:
 #   1. smoothed_y : smoothed y data as 1D np.array
- def denoise_and_smooth_data(x,y):
+def denoise_and_smooth_data(x,y):
     ########## Denoise data (wavelet transform) ##########
     # Perform wavelet decomposition
     wavelet = 'db4'  # Choose a wavelet type, e.g., Daubechies 4
