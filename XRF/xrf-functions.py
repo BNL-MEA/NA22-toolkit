@@ -658,6 +658,9 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     # Plot points identified as peaks
     fig1.add_trace(go.Scatter(x = energy_int[peaks], y = AOI_bkg_sub[peaks], mode = 'markers+text', name = 'Peak fit', text = labels))
     
+    # Plot smoothed spectrum 
+    fig1.add_trace(go.Scatter(x = energy_int, y = y_smoothed, mode = 'lines', name = 'Smoothed Spectra'))
+    
     # Plot formatting
     fig1.update_yaxes(title_text = 'Intensity (counts)', type = 'log', exponentformat = 'e')
     fig1.update_xaxes(title_text = 'Energy (keV)')
@@ -710,6 +713,9 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     
             # Plot points identified as peaks
             fig1.add_trace(go.Scatter(x = energy_int[peaks], y = AOI_bkg_sub[peaks],mode = 'markers+text', name = 'Peak fit', text = labels))
+            
+            # Plot smoothed spectrum 
+            fig1.add_trace(go.Scatter(x = energy_int, y = y_smoothed, mode = 'lines', name = 'Smoothed Spectra'))
 
             # Plot formatting
             fig1.update_yaxes(title_text = 'Intensity (counts)', type = 'log', exponentformat = 'e')
