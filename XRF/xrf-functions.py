@@ -162,43 +162,43 @@ def denoise_and_smooth_data(x,y):
     thresholded_coeffs = [pywt.threshold(c, best_threshold, mode='soft') for c in coeffs]
     y = pywt.waverec(thresholded_coeffs, wavelet)
 
-    # ########## Smooth data (Savitzky-Golay filter)##########
-    # # Define ranges of window sizes and polynomial degrees to try
-    # window_sizes = range(5, 30, 2)  # Adjust as needed
-    # polynomial_degrees = range(2, 5)  # Adjust as needed
+    ########## Smooth data (Savitzky-Golay filter)##########
+    # Define ranges of window sizes and polynomial degrees to try
+    window_sizes = range(5, 30, 2)  # Adjust as needed
+    polynomial_degrees = range(2, 5)  # Adjust as needed
     
-    # # Perform k-fold cross-validation to choose optimal window size and polynomial degree
-    # kf = KFold(n_splits=5, shuffle=True)
-    # best_mse = float('inf')
-    # best_window_size = None
-    # best_poly_degree = None
+    # Perform k-fold cross-validation to choose optimal window size and polynomial degree
+    kf = KFold(n_splits=5, shuffle=True)
+    best_mse = float('inf')
+    best_window_size = None
+    best_poly_degree = None
     
-    # for window_size in window_sizes:
-        # for poly_degree in polynomial_degrees:
-            # fold_mse = 0
-            # for train_index, val_index in kf.split(x):
-                # x_train, x_val = x[train_index], x[val_index]
-                # y_train, y_val = y[train_index], y[val_index]
+    for window_size in window_sizes:
+        for poly_degree in polynomial_degrees:
+            fold_mse = 0
+            for train_index, val_index in kf.split(x):
+                x_train, x_val = x[train_index], x[val_index]
+                y_train, y_val = y[train_index], y[val_index]
                 
-                # # Apply Savitzky-Golay filter with current window size and polynomial degree
-                # smoothed_y = savgol_filter(y_train, window_size, poly_degree)
+                # Apply Savitzky-Golay filter with current window size and polynomial degree
+                smoothed_y = savgol_filter(y_train, window_size, poly_degree)
                 
-                # # Evaluate smoothed data on validation set
-                # val_predictions = np.interp(x_val, x_train, smoothed_y)
-                # fold_mse += mean_squared_error(y_val, val_predictions)
+                # Evaluate smoothed data on validation set
+                val_predictions = np.interp(x_val, x_train, smoothed_y)
+                fold_mse += mean_squared_error(y_val, val_predictions)
             
-            # fold_avg_mse = fold_mse / kf.n_splits
+            fold_avg_mse = fold_mse / kf.n_splits
             
-            # # Update best parameters if current ones are better
-            # if fold_avg_mse < best_mse:
-                # best_mse = fold_avg_mse
-                # best_window_size = window_size
-                # best_poly_degree = poly_degree
+            # Update best parameters if current ones are better
+            if fold_avg_mse < best_mse:
+                best_mse = fold_avg_mse
+                best_window_size = window_size
+                best_poly_degree = poly_degree
     
-    # # Apply Savitzky-Golay filter with the best parameters
-    # denoised_and_smoothed_y = savgol_filter(y, best_window_size, best_poly_degree)
+    # Apply Savitzky-Golay filter with the best parameters
+    denoised_and_smoothed_y = savgol_filter(y, best_window_size, best_poly_degree)
 
-    return y #denoised_and_smoothed_y
+    return denoised_and_smoothed_y
 
 
 ########## Identify Elements ##########
