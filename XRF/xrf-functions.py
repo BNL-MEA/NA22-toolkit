@@ -123,7 +123,7 @@ def denoise_and_smooth_data(x,y):
     ########## Denoise data (wavelet transform) ##########
     # Perform wavelet decomposition
     wavelet = 'db4'  # Choose a wavelet type, e.g., Daubechies 4
-    max_levels = 10  # Number of decomposition levels
+    max_levels = 20  # Number of decomposition levels
     
     
     # Define range of threshold values to try
