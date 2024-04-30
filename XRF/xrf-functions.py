@@ -164,7 +164,7 @@ def denoise_and_smooth_data(x,y):
 
     ########## Smooth data (Savitzky-Golay filter)##########
     # Define ranges of window sizes and polynomial degrees to try
-    window_sizes = range(5, 11, 1)  # Adjust as needed
+    window_sizes = range(5, 30, 1)  # Adjust as needed
     polynomial_degrees = range(2, 5)  # Adjust as needed
     
     # Perform k-fold cross-validation to choose optimal window size and polynomial degree
