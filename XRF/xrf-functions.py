@@ -161,7 +161,7 @@ def denoise_and_smooth_data(x,y):
                 best_mse = fold_avg_mse
                 best_threshold = threshold
                 best_coeffs = coeffs
-                best_level = levels
+                best_levels = levels
     print(best_threshold)
     print(best_levels)
     
