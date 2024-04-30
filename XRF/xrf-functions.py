@@ -512,11 +512,11 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     detector_2D_map_fig.show()
 
     ########## Handling bad pixels ##########
-    user_input = input("Smooth over bad pixels? (Yes or No):")
-    if user_input.lower() == "yes":
+    bad_pixels = input("Smooth over bad pixels? (Yes or No):")
+    if bad_pixels.lower() == "yes":
         # get number of values to extract
-        user_input = input("Input integer value for number of bad pixels based on number unique xy coordinates showing distinctly lower intensity:")
-        k = int(user_input) # number of values to be extracted 
+        nbad_pixels = input("Input integer value for number of bad pixels based on number unique xy coordinates showing distinctly lower intensity:")
+        k = int(nbad_pixels) # number of values to be extracted 
         idx_flat = np.argpartition(temp.flatten(),k)[:k] # index of k lowest values 
         idx_2d = np.unravel_index(idx_flat,temp.shape)
         temp[idx_2d] = np.mean(temp) # new detecotr data without dead pixels 
@@ -555,6 +555,12 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
             # extracting this energy range from the hdf file data
             element_det_data = data[:, :, energy_range]
             summed_element_det_data = np.sum(element_det_data, axis=(2))
+            
+            if bad_pixels.lower() == "yes":
+                k = int(nbad_pixels) # number of values to be extracted 
+                idx_flat = np.argpartition(summed_element_det_data.flatten(),k)[:k] # index of k lowest values 
+                idx_2d = np.unravel_index(idx_flat,summed_element_det_data.shape)
+                summed_element_det_data[idx_2d] = np.mean(summed_element_det_data) # new detecotr data without dead pixels 
 
             # plotting detector map highlighting element of interest's signal
             element_2D_map_fig.add_trace(go.Heatmap(z = summed_element_det_data), row = count + 1, col = 1 )
