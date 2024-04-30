@@ -137,7 +137,7 @@ def denoise_and_smooth_data(x,y):
             for train_index, val_index in kf.split(x):
                 x_train, x_val = x[train_index], x[val_index]
                 y_train, y_val = y[train_index], y[val_index]
-                
+                print(window_size,poly_degree)
                 # Apply Savitzky-Golay filter with current window size and polynomial degree
                 smoothed_y = savgol_filter(y_train, window_size, poly_degree)
                 
@@ -164,7 +164,7 @@ def denoise_and_smooth_data(x,y):
     coeffs = pywt.wavedec(smoothed_y, wavelet, level=levels)
     
     # Define range of threshold values to try
-    threshold_values = np.linspace(0.0001, 0.5, 500)  # Adjust as needed
+    threshold_values = np.linspace(0.001, 0.5, 500)  # Adjust as needed
     
     # Perform k-fold cross-validation to choose optimal threshold value
     kf = KFold(n_splits=5, shuffle=True)
