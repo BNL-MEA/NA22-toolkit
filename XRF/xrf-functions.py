@@ -640,8 +640,8 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
 
 
     ########## Find peaks in data using parameter thresholds ##########
-    prom = 70
-    tall = 70
+    prom = 0.0001
+    tall = 0.0001
     dist = 10
     y_smoothed = np.exp(denoise_and_smooth_data(energy_int, np.log(AOI_bkg_sub)))
     peaks, properties = find_peaks(y_smoothed, prominence = prom, height = tall, distance = dist)
