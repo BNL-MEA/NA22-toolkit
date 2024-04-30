@@ -126,7 +126,7 @@ def denoise_and_smooth_data(x,y):
     ########## Denoise data (wavelet transform) ##########
     # Perform wavelet decomposition
     wavelet = 'db4'  # Choose a wavelet type, e.g., Daubechies 4
-    levels = 4  # Number of decomposition levels
+    levels = 8  # Number of decomposition levels
     coeffs = pywt.wavedec(y, wavelet, level=levels)
     
     # Define range of threshold values to try
@@ -167,7 +167,7 @@ def denoise_and_smooth_data(x,y):
 
     ########## Smooth data (Savitzky-Golay filter)##########
     # Define ranges of window sizes and polynomial degrees to try
-    window_sizes = range(5, 30, 1)  # Adjust as needed
+    window_sizes = range(5, 30, 2)  # Adjust as needed
     polynomial_degrees = range(2, 5)  # Adjust as needed
     
     # Perform k-fold cross-validation to choose optimal window size and polynomial degree
