@@ -130,7 +130,7 @@ def denoise_and_smooth_data(x,y):
     polynomial_degrees = range(2, 5)  # Adjust as needed
     
     # Perform k-fold cross-validation to choose optimal window size and polynomial degree
-    kf = KFold(n_splits=5, shuffle=True)
+    kf = KFold(n_splits=5, shuffle=True, random_state = 42)
     best_mse = float('inf')
     best_window_size = None
     best_poly_degree = None
@@ -141,7 +141,6 @@ def denoise_and_smooth_data(x,y):
             for train_index, val_index in kf.split(x):
                 x_train, x_val = x[train_index], x[val_index]
                 y_train, y_val = y[train_index], y[val_index]
-                print(window_size,poly_degree)
                 # Apply Savitzky-Golay filter with current window size and polynomial degree
                 smoothed_y = savgol_filter(y_train, window_size, poly_degree)
                 
@@ -171,7 +170,7 @@ def denoise_and_smooth_data(x,y):
     threshold_values = np.linspace(0.001, 0.5, 500)  # Adjust as needed
     
     # Perform k-fold cross-validation to choose optimal threshold value
-    kf = KFold(n_splits=5, shuffle=True)
+    kf = KFold(n_splits=5, shuffle=True, random_state = 42)
     best_mse = float('inf')
     best_threshold = None
     
