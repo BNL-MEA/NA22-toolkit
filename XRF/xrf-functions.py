@@ -123,43 +123,48 @@ def denoise_and_smooth_data(x,y):
     ########## Denoise data (wavelet transform) ##########
     # Perform wavelet decomposition
     wavelet = 'db4'  # Choose a wavelet type, e.g., Daubechies 4
-    levels = 6  # Number of decomposition levels
-    coeffs = pywt.wavedec(y, wavelet, level=levels)
+    max_levels = 10  # Number of decomposition levels
+    
     
     # Define range of threshold values to try
-    threshold_values = np.linspace(0.01, 0.5, 500)  # Adjust as needed
+    threshold_values = np.linspace(0.01, 5, 500)  # Adjust as needed
     
     # Perform k-fold cross-validation to choose optimal threshold value
     kf = KFold(n_splits=5, shuffle=True)
     best_mse = float('inf')
     best_threshold = None
-    
+    best_coeffs = None
     for threshold in threshold_values:
-        fold_mse = 0
-        for train_index, val_index in kf.split(x):
-            x_train, x_val = x[train_index], x[val_index]
-            y_train, y_val = y[train_index], y[val_index]
+        for levels in range(1,max_levels + 1):
+            coeffs = pywt.wavedec(y, wavelet, level=levels)
+            fold_mse = 0
+            for train_index, val_index in kf.split(x):
+                x_train, x_val = x[train_index], x[val_index]
+                y_train, y_val = y[train_index], y[val_index]
+                
+                # Perform wavelet denoising with current threshold
+                thresholded_coeffs = [pywt.threshold(c, threshold, mode='soft') for c in coeffs]
+                denoised_y = pywt.waverec(thresholded_coeffs, wavelet)
+                
+                # Interpolate denoised signal at original data points
+                interpolated_denoised_y = np.interp(x_train, x, denoised_y)
+                
+                # Evaluate interpolated denoised data on validation set
+                val_predictions = np.interp(x_val, x_train, interpolated_denoised_y)
+                fold_mse += mean_squared_error(y_val, val_predictions)
             
-            # Perform wavelet denoising with current threshold
-            thresholded_coeffs = [pywt.threshold(c, threshold, mode='soft') for c in coeffs]
-            denoised_y = pywt.waverec(thresholded_coeffs, wavelet)
+            fold_avg_mse = fold_mse / kf.n_splits
             
-            # Interpolate denoised signal at original data points
-            interpolated_denoised_y = np.interp(x_train, x, denoised_y)
-            
-            # Evaluate interpolated denoised data on validation set
-            val_predictions = np.interp(x_val, x_train, interpolated_denoised_y)
-            fold_mse += mean_squared_error(y_val, val_predictions)
-        
-        fold_avg_mse = fold_mse / kf.n_splits
-        
-        # Update best threshold value if current one is better
-        if fold_avg_mse < best_mse:
-            best_mse = fold_avg_mse
-            best_threshold = threshold
+            # Update best threshold value if current one is better
+            if fold_avg_mse < best_mse:
+                best_mse = fold_avg_mse
+                best_threshold = threshold
+                best_coeffs = coeffs
+    print(best_threshold)
+    print(best_coeffs)
     
     # Perform final denoising with the best threshold value
-    thresholded_coeffs = [pywt.threshold(c, best_threshold, mode='soft') for c in coeffs]
+    thresholded_coeffs = [pywt.threshold(c, best_threshold, mode='soft') for c in best_coeffs]
     y_denoised = pywt.waverec(thresholded_coeffs, wavelet)
 
     ########## Smooth data (Savitzky-Golay filter)##########
