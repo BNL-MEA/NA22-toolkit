@@ -164,7 +164,7 @@ def denoise_and_smooth_data(x,y):
     coeffs = pywt.wavedec(smoothed_y, wavelet, level=levels)
     
     # Define range of threshold values to try
-    threshold_values = np.linspace(0.01, 5, 500)  # Adjust as needed
+    threshold_values = np.linspace(0.001, 0.5, 500)  # Adjust as needed
     
     # Perform k-fold cross-validation to choose optimal threshold value
     kf = KFold(n_splits=5, shuffle=True)
