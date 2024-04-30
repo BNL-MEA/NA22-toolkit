@@ -37,6 +37,10 @@ from sklearn.model_selection import KFold
 from sklearn.metrics import mean_squared_error
 
 
+# calculate the distance between values x1 and x2
+def distance(x1,x2):
+    return np.sqrt((x1 - x2)**2)
+
 
 ########## Combine lists and remove duplicates ##########
 # function primarily used to combine lists of identified elements in Spectrum into a single list
@@ -473,10 +477,10 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     # Position axes
     x_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),data.shape[1])
     y_pos = np.linspace(pos_data[1].min(),pos_data[1].max(),data.shape[1])
-    detector_area = max(x_pos)*max(y_pos) # units of micron squared
+    detector_area = distance(min(x_pos),max(x_pos))*distance(min(y_pos),max(y_pos)) # units of micron squared
     
     # Calculating ion flux from average of i0
-    ion_chamber_data = np.mean(ion_chamber_data)
+    ion_flux = np.mean(ion_chamber_data)/detector_area
     
 
     # Use incident X-ray energy to define energy range of interest 
@@ -490,8 +494,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
 
 
     # Total average spectrum
-    whole_det_ion_flux = ion_chamber_data/detector_area
-    avg_data = np.mean(data, axis = (0,1))/whole_det_ion_flux # normalize by ion flux
+    avg_data = np.mean(data, axis = (0,1))/ion_flux # normalize by ion chamber flux
     avg_data = avg_data[min_idx:max_idx]
     
     
@@ -589,12 +592,10 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     AOI_data = data[detector_ROI_rows, detector_ROI_columns, :]
     y_int = y_pos[detector_ROI_columns]
     x_int = x_pos[detector_ROI_rows]
-    AOI_det_area = (max(x_int)-min(x_int))*(max(y_int)-min(y_int))
-    AOI_ion_flux = whole_det_ion_flux*AOI_det_area
  
    
     # Avg spectrum in selected area
-    AOI = np.mean(AOI_data, axis=(0,1))/AOI_ion_flux
+    AOI = np.mean(AOI_data, axis=(0,1))/ion_flux
     AOI = AOI[min_idx:max_idx]
     energy_int = energy[min_idx:max_idx]
     
@@ -619,7 +620,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
      
        
         # Avg background spectrum in selected area
-        background = np.mean(bkg_data, axis=(0,1))/AOI_ion_flux
+        background = np.mean(bkg_data, axis=(0,1))/ion_flux
         background = background[min_idx:max_idx]
         
 
@@ -642,7 +643,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     prom = 70
     tall = 70
     dist = 10
-    y_smoothed = denoise_and_smooth_data(energy_int, AOI_bkg_sub)
+    y_smoothed = np.exp(denoise_and_smooth_data(energy_int, np.log(AOI_bkg_sub)))
     peaks, properties = find_peaks(y_smoothed, prominence = prom, height = tall, distance = dist)
 
    
@@ -662,8 +663,8 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     # Plot Background subtracted AOI spectrum
     fig1.add_trace(go.Scatter(x = energy_int, y = AOI_bkg_sub, mode = 'lines', name = 'AOI bkg subtracted'))
     
-    # Plot total summed spectrum 
-    fig1.add_trace(go.Scatter(x = energy_int, y = avg_data, mode = 'lines', name = 'Summed Spectrum'))
+    # Plot total averaged spectrum 
+    fig1.add_trace(go.Scatter(x = energy_int, y = avg_data, mode = 'lines', name = 'Avg Spectrum'))
 
     if 'background' in vars():
         # Plot background spectrum        
@@ -896,7 +897,8 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
     # Position axes
     x_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),data.shape[1])
     y_pos = np.linspace(pos_data[1].min(),pos_data[1].max(),data.shape[1])
-    detector_area = max(x_pos)*max(y_pos) # units of micron squared
+    detector_area = distance(min(x_pos),max(x_pos))*distance(min(y_pos),max(y_pos)) # units of micron squared
+
     
     # Calculating ion flux from average of i0
     ion_flux = np.mean(ion_chamber_data)/detector_area
@@ -996,7 +998,7 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
     
 
     ########## Find peaks in data using parameter thresholds ##########
-    y_smoothed = denoise_and_smooth_data(energy_int, AOI_bkg_sub)
+    y_smoothed = np.exp(denoise_and_smooth_data(energy_int, np.log(AOI_bkg_sub)))
     peaks, properties = find_peaks(y_smoothed, prominence = prom, height = height, distance = dist)
      # Label peaks
     labels = []
@@ -1225,7 +1227,7 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
     # Position axes
     x_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),data.shape[1])
     y_pos = np.linspace(pos_data[1].min(),pos_data[1].max(),data.shape[1])
-    detector_area = max(x_pos)*max(y_pos) # units of micron squared
+    detector_area = distance(min(x_pos),max(x_pos))*distance(min(y_pos),max(y_pos)) # units of micron squared
     
     # Calculating ion flux from average of i0
     ion_flux = np.mean(ion_chamber_data)/detector_area
@@ -1280,7 +1282,7 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
     
     ########## Identify Peaks ##########
     # find peaks
-    y_smoothed = denoise_and_smooth_data(energy_int, AOI_bkg_sub)
+    y_smoothed = np.exp(denoise_and_smooth_data(energy_int, np.log(AOI_bkg_sub)))
     peaks, _ = find_peaks(y_smoothed, distance = 10)
     
     # Label peaks
