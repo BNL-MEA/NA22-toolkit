@@ -160,11 +160,11 @@ def denoise_and_smooth_data(x,y):
     
     # Perform final denoising with the best threshold value
     thresholded_coeffs = [pywt.threshold(c, best_threshold, mode='soft') for c in coeffs]
-    y = pywt.waverec(thresholded_coeffs, wavelet)
+    y_denoised = pywt.waverec(thresholded_coeffs, wavelet)
 
     ########## Smooth data (Savitzky-Golay filter)##########
     # Define ranges of window sizes and polynomial degrees to try
-    window_sizes = range(5, 20, 1)  # Adjust as needed
+    window_sizes = range(5, 11, 1)  # Adjust as needed
     polynomial_degrees = range(2, 5)  # Adjust as needed
     
     # Perform k-fold cross-validation to choose optimal window size and polynomial degree
@@ -196,7 +196,7 @@ def denoise_and_smooth_data(x,y):
                 best_poly_degree = poly_degree
     
     # Apply Savitzky-Golay filter with the best parameters
-    denoised_and_smoothed_y = savgol_filter(y, best_window_size, best_poly_degree)
+    denoised_and_smoothed_y = savgol_filter(y_denoised, best_window_size, best_poly_degree)
     print(best_window_size,best_poly_degree)
     return denoised_and_smoothed_y
 
