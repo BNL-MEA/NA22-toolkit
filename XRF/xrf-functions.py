@@ -639,7 +639,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     prom = 70
     tall = 70
     dist = 10
-    y_smoothed = np.exp(denoise_and_smooth_data(energy_int, np.log(AOI_bkg_sub)))
+    y_smoothed = denoise_and_smooth_data(energy_int, AOI_bkg_sub)
     peaks, properties = find_peaks(y_smoothed, prominence = prom, height = tall, distance = dist)
 
    
@@ -993,7 +993,7 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
     
 
     ########## Find peaks in data using parameter thresholds ##########
-    y_smoothed = np.exp(denoise_and_smooth_data(energy_int, np.log(AOI_bkg_sub)))
+    y_smoothed = denoise_and_smooth_data(energy_int, AOI_bkg_sub)
     peaks, properties = find_peaks(y_smoothed, prominence = prom, height = height, distance = dist)
      # Label peaks
     labels = []
@@ -1277,7 +1277,7 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
     
     ########## Identify Peaks ##########
     # find peaks
-    y_smoothed = np.exp(denoise_and_smooth_data(energy_int, np.log(AOI_bkg_sub)))
+    y_smoothed = denoise_and_smooth_data(energy_int, AOI_bkg_sub)
     peaks, _ = find_peaks(y_smoothed, distance = 10)
     
     # Label peaks
