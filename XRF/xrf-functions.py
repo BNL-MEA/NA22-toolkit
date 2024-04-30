@@ -197,7 +197,7 @@ def denoise_and_smooth_data(x,y):
     
     # Apply Savitzky-Golay filter with the best parameters
     denoised_and_smoothed_y = savgol_filter(y, best_window_size, best_poly_degree)
-
+    print(best_window_size,best_poly_degree)
     return denoised_and_smoothed_y
 
 
