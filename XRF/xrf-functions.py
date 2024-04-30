@@ -120,10 +120,13 @@ def input_to_slice(user_input):
 # Outputs:
 #   1. smoothed_y : smoothed y data as 1D np.array
 def denoise_and_smooth_data(x,y):
+   
+
+
     ########## Denoise data (wavelet transform) ##########
     # Perform wavelet decomposition
     wavelet = 'db4'  # Choose a wavelet type, e.g., Daubechies 4
-    levels = 8  # Number of decomposition levels
+    levels = 4  # Number of decomposition levels
     coeffs = pywt.wavedec(y, wavelet, level=levels)
     
     # Define range of threshold values to try
