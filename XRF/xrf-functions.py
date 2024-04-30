@@ -457,17 +457,24 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     with h5py.File(filename, 'r') as file:
         data = file['xrfmap/detsum/counts'][:]
         pos_data = file['xrfmap/positions/pos'][:]
+        ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
         group_name = 'xrfmap/scan_metadata'
         if group_name in file:
             group = file[group_name]
             attributes = dict(group.attrs)
             incident_energy = attributes['instrument_mono_incident_energy'] # keV
+            ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
         else:
             print(f"Group '{group_name}' not found in the HDF5 file.")
     
     # Position axes
     x_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),data.shape[1])
     y_pos = np.linspace(pos_data[1].min(),pos_data[1].max(),data.shape[1])
+    detector_area = max(x_pos)*max(y_pos) # units of micron squared
+    
+    # Calculating ion flux from average of i0
+    ion_flux = np.mean(ion_chamber_data)/detector_area
+    
 
     # Use incident X-ray energy to define energy range of interest 
     # incident_wavelength = 1.2398e-9/incident_energy # convert incident energy to wavelength (hc/lambda)
@@ -479,9 +486,10 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     max_idx = min([i for i, v in enumerate(energy) if v >= incident_energy])
 
 
-    # Total summed spectrum
-    avg_data = np.mean(data, axis = (0,1))
+    # Total average spectrum
+    avg_data = np.mean(data, axis = (0,1))/ion_flux # normalize by ion chamber flux
     avg_data = avg_data[min_idx:max_idx]
+    
     
     ########## Plotting whole detector view to identify AOI ##########
     temp = np.sum(data,axis = (2))
@@ -863,17 +871,27 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
 #     4. x_pos, y_pos: x and y position of the detector image location based on the sample stage
 #     5. matched_peaks: peaks matched to an element known to be present
 def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, prom, height, dist, bad_pixels, error_peaks):
-    ########## Load data file in variable ##########
+    ########## Load data filenin variable ##########
     with h5py.File(filename, 'r') as file:
         data = file['xrfmap/detsum/counts'][:]
         pos_data = file['xrfmap/positions/pos'][:]
+        ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
         group_name = 'xrfmap/scan_metadata'
         if group_name in file:
             group = file[group_name]
             attributes = dict(group.attrs)
             incident_energy = attributes['instrument_mono_incident_energy'] # keV
+            ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
         else:
             print(f"Group '{group_name}' not found in the HDF5 file.")
+    
+    # Position axes
+    x_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),data.shape[1])
+    y_pos = np.linspace(pos_data[1].min(),pos_data[1].max(),data.shape[1])
+    detector_area = max(x_pos)*max(y_pos) # units of micron squared
+    
+    # Calculating ion flux from average of i0
+    ion_flux = np.mean(ion_chamber_data)/detector_area
     
     
 
@@ -919,8 +937,9 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
     
     detector_2D_map_fig.show()
     
-    ########## Total summed spectrum ##########
-    avg_data = np.mean(data, axis = (0,1))
+    
+    ########## Total average spectrum ##########
+    avg_data = np.mean(data, axis = (0,1))/ion_flux # normalize by ion chamber flux
     avg_data = avg_data[min_idx:max_idx]
     
     
@@ -1170,14 +1189,17 @@ def extract_detector_data(filename):
 #   2. cal_eq: calibration equation for calculating the mass relative to intensity. 
 
 def standard_data_extractor(standard_filename, background_filename, open_air_filename, element, area_rho, scan_area, min_energy):  
-    ########## extract standard data ##########
+    ########## Load data filenin variable ##########
     with h5py.File(standard_filename, 'r') as file:
-        standard_data = file['xrfmap/detsum/counts'][:]
+        data = file['xrfmap/detsum/counts'][:]
+        pos_data = file['xrfmap/positions/pos'][:]
+        ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
         group_name = 'xrfmap/scan_metadata'
         if group_name in file:
             group = file[group_name]
             attributes = dict(group.attrs)
             incident_energy = attributes['instrument_mono_incident_energy'] # keV
+            ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
         else:
             print(f"Group '{group_name}' not found in the HDF5 file.")
     
@@ -1192,8 +1214,17 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
     min_idx = max([i for i, v in enumerate(energy) if v <= min_energy])    
     
     
+    # Position axes
+    x_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),data.shape[1])
+    y_pos = np.linspace(pos_data[1].min(),pos_data[1].max(),data.shape[1])
+    detector_area = max(x_pos)*max(y_pos) # units of micron squared
+    
+    # Calculating ion flux from average of i0
+    ion_flux = np.mean(ion_chamber_data)/detector_area
+    
+    
     # Total avg spectrum
-    standard_avg_data = np.mean(standard_data, axis = (0,1))
+    standard_avg_data = np.mean(standard_data, axis = (0,1))/ion_flux # normalize by ion chamber
     standard_avg_data = standard_avg_data[min_idx:max_idx]
     energy_int = energy[min_idx:max_idx]
     
@@ -1202,18 +1233,29 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
     
     ########## extract background data ##########
     with h5py.File(background_filename, 'r') as file:
-        background_data = file['xrfmap/detsum/counts'][:]
+        data = file['xrfmap/detsum/counts'][:]
+        pos_data = file['xrfmap/positions/pos'][:]
+        ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
         group_name = 'xrfmap/scan_metadata'
         if group_name in file:
             group = file[group_name]
             attributes = dict(group.attrs)
             incident_energy = attributes['instrument_mono_incident_energy'] # keV
+            ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
         else:
             print(f"Group '{group_name}' not found in the HDF5 file.")
     
+    # Position axes
+    x_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),data.shape[1])
+    y_pos = np.linspace(pos_data[1].min(),pos_data[1].max(),data.shape[1])
+    detector_area = max(x_pos)*max(y_pos) # units of micron squared
+    
+    # Calculating ion flux from average of i0
+    ion_flux = np.mean(ion_chamber_data)/detector_area
+    
     
     # Total avg spectrum
-    background_avg_data = np.mean(background_data, axis = (0,1))
+    background_avg_data = np.mean(background_data, axis = (0,1))/ion_flux # normalize by ion chamber flux
     background_avg_data = background_avg_data[min_idx:max_idx]
     
     
