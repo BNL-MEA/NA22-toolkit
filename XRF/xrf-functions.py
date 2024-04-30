@@ -134,6 +134,7 @@ def denoise_and_smooth_data(x,y):
     best_mse = float('inf')
     best_threshold = None
     best_coeffs = None
+    best_levels = None
     for threshold in threshold_values:
         for levels in range(1,max_levels + 1):
             coeffs = pywt.wavedec(y, wavelet, level=levels)
@@ -160,8 +161,9 @@ def denoise_and_smooth_data(x,y):
                 best_mse = fold_avg_mse
                 best_threshold = threshold
                 best_coeffs = coeffs
+                best_level = levels
     print(best_threshold)
-    print(best_coeffs)
+    print(best_levels)
     
     # Perform final denoising with the best threshold value
     thresholded_coeffs = [pywt.threshold(c, best_threshold, mode='soft') for c in best_coeffs]
