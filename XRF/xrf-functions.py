@@ -672,11 +672,13 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
         # Plot baseline spectrum
         fig1.add_trace(go.Scatter(x = energy_int, y = baseline, mode = 'lines', name = 'Baseline Spectrum'))
     
+    # Plot smoothed spectrum 
+    fig1.add_trace(go.Scatter(x = energy_int, y = y_smoothed, mode = 'lines', name = 'Smoothed Spectrum'))
+    
     # Plot points identified as peaks
     fig1.add_trace(go.Scatter(x = energy_int[peaks], y = AOI_bkg_sub[peaks], mode = 'markers+text', name = 'Peak fit', text = labels))
     
-    # Plot smoothed spectrum 
-    fig1.add_trace(go.Scatter(x = energy_int, y = y_smoothed, mode = 'lines', name = 'Smoothed Spectrum'))
+
     
     # Plot formatting
     fig1.update_yaxes(title_text = 'Intensity (counts)', type = 'log', exponentformat = 'e')
@@ -727,12 +729,15 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
 
                 # Plot baseline spectrum
                 fig1.add_trace(go.Scatter(x = energy_int, y = baseline, mode = 'lines', name = 'Baseline Spectrum'))
-    
-            # Plot points identified as peaks
-            fig1.add_trace(go.Scatter(x = energy_int[peaks], y = AOI_bkg_sub[peaks],mode = 'markers+text', name = 'Peak fit', text = labels))
             
             # Plot smoothed spectrum 
             fig1.add_trace(go.Scatter(x = energy_int, y = y_smoothed, mode = 'lines', name = 'Smoothed Spectrum'))
+            
+            
+            # Plot points identified as peaks
+            fig1.add_trace(go.Scatter(x = energy_int[peaks], y = AOI_bkg_sub[peaks],mode = 'markers+text', name = 'Peak fit', text = labels))
+            
+           
 
             # Plot formatting
             fig1.update_yaxes(title_text = 'Intensity (counts)', type = 'log', exponentformat = 'e')
