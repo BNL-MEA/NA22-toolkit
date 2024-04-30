@@ -591,7 +591,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
  
    
     # Avg spectrum in selected area
-    AOI = np.mean(AOI_data, axis=(0,1))
+    AOI = np.mean(AOI_data, axis=(0,1))/ion_flux
     AOI = AOI[min_idx:max_idx]
     energy_int = energy[min_idx:max_idx]
     
@@ -616,7 +616,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
      
        
         # Avg background spectrum in selected area
-        background = np.mean(bkg_data, axis=(0,1))
+        background = np.mean(bkg_data, axis=(0,1))/ion_flux
         background = background[min_idx:max_idx]
         
 
@@ -954,7 +954,7 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
     
     
     # Sum spectrum in selected area
-    AOI = np.mean(AOI_data, axis=(0,1))
+    AOI = np.mean(AOI_data, axis=(0,1))/ion_flux
     AOI = AOI[min_idx:max_idx]
     energy_int = energy[min_idx:max_idx]
     
@@ -975,7 +975,7 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
         bkg_data = data[BKG_y, BKG_x, :]
         
         # Avg background spectrum in selected area
-        background = np.mean(bkg_data, axis=(0,1))
+        background = np.mean(bkg_data, axis=(0,1))/ion_flux
         background = background[min_idx:max_idx]
         
 
