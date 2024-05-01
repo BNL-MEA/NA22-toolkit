@@ -233,7 +233,7 @@ def identify_element_match(elements, peaks, tolerance, incident_energy):
             absorption_edge_id = list(xray_line.values())[i][2] # output absoprtion edge name of the selected element in the i-th index
             absorption_edge_energy = xdb.xray_edge(element,absorption_edge_id)[0] # absorption edge energy in eV
             
-            if absoprtion_edge_energy < incident_energy:            
+            if absorption_edge_energy < incident_energy:            
                 # find fluorscence line that matches to each peak
                 for j, peak in enumerate(peaks):
                     largest_value = max(peak,fluor_energy)
