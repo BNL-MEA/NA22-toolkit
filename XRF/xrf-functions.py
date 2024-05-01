@@ -808,8 +808,8 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     # fig1.add_trace(go.Scatter(x = energy_int, y = peak_fit, mode = 'lines', name ='AOI Spectrum Fit'))
     # fig1.add_trace(go.Scatter(x = energy_int, y = bkg_fit, mode = 'lines', name = 'AOI Spectrum Bkg Fit'))
 
-    # # Plot points identified as peaks
-    # fig1.add_trace(go.Scatter(x = energy_int[peaks], y = peak_fit[peaks],mode = 'markers+text', name = 'Peak fit', text = labels))
+    # Plot points identified as peaks
+    fig1.add_trace(go.Scatter(x = energy_int[peaks], y = peak_fit[peaks],mode = 'markers+text', name = 'Peak fit', text = labels))
 
     # Plot smoothed spectrum 
     fig1.add_trace(go.Scatter(x = energy_int, y = y_smoothed, mode = 'lines', name = 'Smoothed Spectrum'))
@@ -821,7 +821,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
 
     ########## Identify elements ##########
     # identify fluorescent line energy that most closely matches the determined peaks
-    tolerance = 1.5 # allowed difference in percent
+    tolerance = 1 # allowed difference in percent
     matched_peaks, _ = identify_element_match(elements, energy_int[peaks]*1000, tolerance)
     # Plotting vertical lines for matched peaks and labeled with element symbol
     for i in range(len(matched_peaks)):
@@ -1073,7 +1073,7 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
 
     ########## Identify elements ##########
     # identify fluorescent line energy that most closely matches the determined peaks
-    tolerance = 1.5 # allowed difference in percent
+    tolerance = 1 # allowed difference in percent
     matched_peaks, _ = identify_element_match(elements, energy_int[peaks]*1000, tolerance)
     # Plotting vertical lines for matched peaks and labeled with element symbol
     for i in range(len(matched_peaks)):
@@ -1301,7 +1301,7 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
     
     ########## Find element of interest ##########
     # identify fluorescent line energy that most closely matches the determined peaks
-    tolerance = 1.5 # allowed difference in percent
+    tolerance = 1 # allowed difference in percent
     matched_peaks, _ = identify_element_match(element, energy_int[peaks]*1000, tolerance)
     
     # find peak belonging to element of interest
