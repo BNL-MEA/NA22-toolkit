@@ -230,8 +230,7 @@ def identify_element_match(elements, peaks, tolerance, incident_energy):
         for i in range(len(line_names)):
             fluor_energy = list(xray_line.values())[i][0] # output fluorscence energy of the selected element in the i-th index
             rel_intensity = list(xray_line.values())[i][1] # output relative intensity of the selected element in the i-th index
-            absorption_edge_id = list(xray_line.values())[i][2][:1] # output absoprtion edge name of the selected element in the i-th index
-            print(element,absorption_edge_id)
+            absorption_edge_id = list(xray_line.values())[i][2][:2] # output absoprtion edge name of the selected element in the i-th index
             absorption_edge_energy = list(xdb.xray_edge(element,absorption_edge_id))[0] # absorption edge energy in eV
             
             if absorption_edge_energy < incident_energy:            
