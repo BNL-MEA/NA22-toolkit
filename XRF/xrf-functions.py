@@ -544,8 +544,12 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
             xray_data = list(xdb.xray_lines(element).values()) # find the xray data for each sample element
             element_energy = []
             for _,line in enumerate(xray_data): # loop through each xray line in each sample element
-                if line[1] >= 0.1 and line[0]< max_energy*1000: # if the line has adequete intensity and below max_energy append to list
+                absorption_edge_id = line[2][:2] # output absoprtion edge name of the selected element in the i-th index
+                absorption_edge_energy = list(xdb.xray_edge(element,absorption_edge_id))[0] # absorption edge energy in eV
+                if line[1] >= 0.1 and absorption_edge_energy < max_energy*1000: # if the line has adequete intensity and below max_energy append to list
                     element_energy = np.append(element_energy,[line[0],line[1],line[2]])
+                    
+                    
         
             element_energy = element_energy.reshape((int(len(element_energy)/3),3)) # reshape to be n x 3 array
             element_energy = np.array([row for row in element_energy if row[2] == element_energy[0,2]]) # select only the first edge available
