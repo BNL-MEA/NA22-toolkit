@@ -162,7 +162,7 @@ def denoise_and_smooth_data(x,y):
                 
                
                 # Evaluate smoothed data on validation set
-                x_val, x_train = equalize_lengths(x_val, x_train)
+                x_train, smoothed_y = equalize_lengths(x_train, smoothed_y)
                 val_predictions = np.interp(x_val, x_train, smoothed_y)
                 fold_mse += mean_squared_error(y_val, val_predictions)
             
@@ -203,11 +203,11 @@ def denoise_and_smooth_data(x,y):
             denoised_y = pywt.waverec(thresholded_coeffs, wavelet)
             
             # Interpolate denoised signal at original data points
-            x_train, x = equalize_lengths(x_train, x)
+            x, denoised_y = equalize_lengths(x, denoised_y)
             interpolated_denoised_y = np.interp(x_train, x, denoised_y)
             
             # Evaluate interpolated denoised data on validation set
-            x_val, x_train = equalize_lengths(x_val, x_train)
+            x_train, interpolated_denoised_y = equalize_lengths(x_train, interpolated_denoised_y)
             val_predictions = np.interp(x_val, x_train, interpolated_denoised_y)
             fold_mse += mean_squared_error(y_val, val_predictions)
         
