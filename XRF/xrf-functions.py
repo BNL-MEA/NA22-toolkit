@@ -108,8 +108,24 @@ def input_to_slice(user_input):
         return slice(start, stop)
     except ValueError:
         print("Invalid input. Please use the format 'start:stop'.")
-        
-        
+
+
+def equalize_lengths(arr1, arr2):
+    len1 = len(arr1)
+    len2 = len(arr2)
+
+    # Compare lengths
+    if len1 > len2:
+        # Remove elements from the end of arr1
+        arr1 = arr1[:len2]
+    elif len2 > len1:
+        # Remove elements from the end of arr2
+        arr2 = arr2[:len1]
+
+    return arr1, arr2        
+
+
+
         
 ########## Smooth Data ##########
 # Denoises data using a wavelet transform. Then smooths data using the Savitzky-Golay filter 
@@ -144,7 +160,9 @@ def denoise_and_smooth_data(x,y):
                 # Apply Savitzky-Golay filter with current window size and polynomial degree
                 smoothed_y = savgol_filter(y_train, window_size, poly_degree)
                 
+               
                 # Evaluate smoothed data on validation set
+                x_val, x_train = equalize_lengths(x_val, x_train)
                 val_predictions = np.interp(x_val, x_train, smoothed_y)
                 fold_mse += mean_squared_error(y_val, val_predictions)
             
@@ -185,9 +203,11 @@ def denoise_and_smooth_data(x,y):
             denoised_y = pywt.waverec(thresholded_coeffs, wavelet)
             
             # Interpolate denoised signal at original data points
+            x_train, x = equalize_lengths(x_train, x)
             interpolated_denoised_y = np.interp(x_train, x, denoised_y)
             
             # Evaluate interpolated denoised data on validation set
+            x_val, x_train = equalize_lengths(x_val, x_train)
             val_predictions = np.interp(x_val, x_train, interpolated_denoised_y)
             fold_mse += mean_squared_error(y_val, val_predictions)
         
