@@ -1265,8 +1265,8 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
     
     
     # Position axes
-    x_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),data.shape[1])
-    y_pos = np.linspace(pos_data[1].min(),pos_data[1].max(),data.shape[1])
+    x_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),standard_data.shape[1])
+    y_pos = np.linspace(pos_data[1].min(),pos_data[1].max(),standard_data.shape[1])
     detector_area = distance(min(x_pos),max(x_pos))*distance(min(y_pos),max(y_pos)) # units of micron squared
     
     # Calculating ion flux from average of i0
