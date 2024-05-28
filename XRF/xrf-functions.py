@@ -1322,7 +1322,7 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
     
     ########## Identify Peaks ##########
     # find peaks
-    y_smoothed = np.exp(denoise_and_smooth_data(energy_int, np.log(AOI_bkg_sub)))
+    y_smoothed = np.exp(denoise_and_smooth_data(energy_int, np.log(std_data_plus_baseline)))
     peaks, _ = find_peaks(y_smoothed, distance = 10)
     
     # Label peaks
