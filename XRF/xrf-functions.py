@@ -274,6 +274,7 @@ def identify_element_match(elements, peaks, tolerance, incident_energy):
     
     column_names =  ["Peak #", "Element", "Emission Line", "Energy (eV)", "Relative Intensity"]
     matched_df = pd.DataFrame(data = matched_fluor_lines, columns = column_names)
+    matched_df = matched_df.drop_duplicates()
     
     # making list in the same order as dataframe
     line_name_int = matched_df['Emission Line'].tolist()
@@ -325,7 +326,6 @@ def identify_element_match(elements, peaks, tolerance, incident_energy):
 
     
     return matched_fluor_lines, matched_df
-
 
 
 ########## Defining Gaussians ##########
