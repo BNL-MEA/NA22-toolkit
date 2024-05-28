@@ -1241,7 +1241,7 @@ def extract_detector_data(filename):
 def standard_data_extractor(standard_filename, background_filename, open_air_filename, element, area_rho, scan_area, min_energy):  
     ########## Load data filenin variable ##########
     with h5py.File(standard_filename, 'r') as file:
-        data = file['xrfmap/detsum/counts'][:]
+        standard_data = file['xrfmap/detsum/counts'][:]
         pos_data = file['xrfmap/positions/pos'][:]
         ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
         group_name = 'xrfmap/scan_metadata'
@@ -1283,7 +1283,7 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
     
     ########## extract background data ##########
     with h5py.File(background_filename, 'r') as file:
-        data = file['xrfmap/detsum/counts'][:]
+        background_data = file['xrfmap/detsum/counts'][:]
         pos_data = file['xrfmap/positions/pos'][:]
         ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
         group_name = 'xrfmap/scan_metadata'
@@ -1296,8 +1296,8 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
             print(f"Group '{group_name}' not found in the HDF5 file.")
     
     # Position axes
-    x_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),data.shape[1])
-    y_pos = np.linspace(pos_data[1].min(),pos_data[1].max(),data.shape[1])
+    x_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),background_data.shape[1])
+    y_pos = np.linspace(pos_data[1].min(),pos_data[1].max(),background_data.shape[1])
     detector_area = max(x_pos)*max(y_pos) # units of micron squared
     
     # Calculating ion flux from average of i0
