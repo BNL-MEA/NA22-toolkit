@@ -1298,7 +1298,8 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
     # Position axes
     x_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),background_data.shape[1])
     y_pos = np.linspace(pos_data[1].min(),pos_data[1].max(),background_data.shape[1])
-    detector_area = max(x_pos)*max(y_pos) # units of micron squared
+    detector_area = distance(min(x_pos),max(x_pos))*distance(min(y_pos),max(y_pos)) # units of micron squared
+    
     
     # Calculating ion flux from average of i0
     ion_flux = np.mean(ion_chamber_data)/detector_area
@@ -1389,8 +1390,16 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
     # determining open-air contributions from empty beampath 
     with h5py.File(open_air_filename, 'r') as file:
         open_air_data = file['xrfmap/detsum/counts'][:]
+        air_pos_data = file['xrfmap/positions/pos'][:]
+        air_ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
 
-    open_air_avg_data = np.mean(open_air_data, axis = (0,1))
+    air_detector_area = distance(air_pos_data[0].min(),air_pos_data[0].max())*distance(air_pos_data[1].min(),air_pos_data[1].max())
+    
+    # Calculating ion flux from average of i0
+    air_ion_flux = np.mean(air_ion_chamber_data)/air_detector_area # normalized by air ion chamber flux
+
+
+    open_air_avg_data = np.mean(open_air_data, axis = (0,1))/air_ion_flux
     open_air_avg_data = open_air_avg_data[min_idx:max_idx]
 
     ## Fit gaussian to region corresponding to element of interest
