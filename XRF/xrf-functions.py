@@ -1341,7 +1341,7 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
     element_peak_idx = [ID[0]-1 for ID in element_int_peaks_standard]
     peaks = peaks[element_peak_idx]
     
-    
+    peak_fit, _, peak_fit_params, _ = peak_fitting(energy_int, std_data_plus_baseline, peaks, 10)
         
         
     ########## Plot the results to ensure they make sense ##########
@@ -1362,6 +1362,9 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
     
     # plot standard + baseline
     fig.add_trace(go.Scatter(x = energy_int, y = std_data_plus_baseline, mode = 'lines', name = 'Bkg subtracted Standard + Baseline'))
+    
+    # plot fitted peak data
+    fig.add_trace(go.Scatter(x = energy_int, y = peak_fit, mode = 'lines', name = 'Fitted Spectra'))
     
     # plot peaks
     fig.add_trace(go.Scatter(x = energy_int[peaks], y = std_data_plus_baseline[peaks], mode = 'markers+text', name = 'peak fit', text = labels))
@@ -1452,7 +1455,7 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
               prop = legend_properties)
     plt.show()
     
-    return fig, cal_eq, sum_open_air_integral
+    return fig, cal_eq, sum_open_air_integral, peak_fit_params
 
 
 
