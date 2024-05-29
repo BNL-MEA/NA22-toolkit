@@ -801,10 +801,10 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
                         
             
     
-    # ########## Fit spectra and plot results ##########
-    # print('Beginning peak fitting')
-    # peak_fit, bkg_fit, peak_fit_params,r_squared = peak_fitting(energy_int, AOI_bkg_sub, peaks, dist)
-    # print('Peak fit r-squared value is:', r_squared)
+    ########## Fit spectra and plot results ##########
+    print('Beginning peak fitting')
+    peak_fit, bkg_fit, peak_fit_params,r_squared = peak_fitting(energy_int, AOI_bkg_sub, peaks, dist)
+    print('Peak fit r-squared value is:', r_squared)
     # # Find peaks in fitted data
     # peaks, properties = find_peaks(peak_fit-bkg_fit)
     
@@ -832,9 +832,9 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
         # Plot baseline spectrum
         fig1.add_trace(go.Scatter(x = energy_int, y = baseline, mode = 'lines', name = 'Baseline Spectrum'))
 
-    # # Plot peak and background fits
-    # fig1.add_trace(go.Scatter(x = energy_int, y = peak_fit, mode = 'lines', name ='AOI Spectrum Fit'))
-    # fig1.add_trace(go.Scatter(x = energy_int, y = bkg_fit, mode = 'lines', name = 'AOI Spectrum Bkg Fit'))
+    # Plot peak and background fits
+    fig1.add_trace(go.Scatter(x = energy_int, y = peak_fit, mode = 'lines', name ='AOI Spectrum Fit'))
+    fig1.add_trace(go.Scatter(x = energy_int, y = bkg_fit, mode = 'lines', name = 'AOI Spectrum Bkg Fit'))
 
     # Plot smoothed spectrum 
     fig1.add_trace(go.Scatter(x = energy_int, y = y_smoothed, mode = 'lines', name = 'Smoothed Spectrum'))
@@ -1054,10 +1054,10 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
         peaks = peaks[mask]
                         
     
-    # ########## Fit spectra and plot results ##########
-    # print('Beginning peak fitting')
-    # peak_fit, bkg_fit, peak_fit_params, r_squared = peak_fitting(energy_int, AOI_bkg_sub, peaks, dist)
-    # print('Peak fit r-squared value is:', r_squared)
+    ########## Fit spectra and plot results ##########
+    print('Beginning peak fitting')
+    peak_fit, bkg_fit, peak_fit_params, r_squared = peak_fitting(energy_int, AOI_bkg_sub, peaks, dist)
+    print('Peak fit r-squared value is:', r_squared)
     # # Find peaks in fitted data
     # peaks, properties = find_peaks(peak_fit-bkg_fit)
     
@@ -1089,8 +1089,8 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
         fig1.add_trace(go.Scatter(x = energy_int, y = baseline, mode = 'lines', name = 'Baseline Spectrum'))
 
     # Plot peak and background fits
-    # fig1.add_trace(go.Scatter(x = energy_int, y = peak_fit, mode = 'lines', name ='AOI Spectrum Fit'))
-    # fig1.add_trace(go.Scatter(x = energy_int, y = bkg_fit, mode = 'lines', name = 'AOI Spectrum Bkg Fit'))
+    fig1.add_trace(go.Scatter(x = energy_int, y = peak_fit, mode = 'lines', name ='AOI Spectrum Fit'))
+    fig1.add_trace(go.Scatter(x = energy_int, y = bkg_fit, mode = 'lines', name = 'AOI Spectrum Bkg Fit'))
 
     # # Plot points identified as peaks
     # fig1.add_trace(go.Scatter(x = energy_int[peaks], y = peak_fit[peaks],mode = 'markers+text', name = 'Peak fit', text = labels))
@@ -1148,7 +1148,7 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
 
    
    
-    return detector_data, fig1, x_pos, y_pos, matched_peaks
+    return detector_data, fig1, x_pos, y_pos, matched_peaks, peak_fit_params
 
 
 
@@ -1340,9 +1340,7 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
     # remove all peaks except those belonging to element of interest
     element_peak_idx = [ID[0]-1 for ID in element_int_peaks_standard]
     peaks = peaks[element_peak_idx]
-    
-    peak_fit, _, peak_fit_params, _ = peak_fitting(energy_int, std_data_plus_baseline, peaks, 10)
-        
+            
         
     ########## Plot the results to ensure they make sense ##########
     fig = go.Figure(data = go.Scatter(x = energy_int, y = standard_avg_data, mode = 'lines', name = 'Standard Spectrum'), layout_xaxis_range = [min_energy,max_energy])
@@ -1363,8 +1361,6 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
     # plot standard + baseline
     fig.add_trace(go.Scatter(x = energy_int, y = std_data_plus_baseline, mode = 'lines', name = 'Bkg subtracted Standard + Baseline'))
     
-    # plot fitted peak data
-    fig.add_trace(go.Scatter(x = energy_int, y = peak_fit, mode = 'lines', name = 'Fitted Spectra'))
     
     # plot peaks
     fig.add_trace(go.Scatter(x = energy_int[peaks], y = std_data_plus_baseline[peaks], mode = 'markers+text', name = 'peak fit', text = labels))
@@ -1455,7 +1451,7 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
               prop = legend_properties)
     plt.show()
     
-    return fig, cal_eq, sum_open_air_integral, peak_fit_params
+    return fig, cal_eq, sum_open_air_integral
 
 
 
