@@ -37,6 +37,12 @@ from sklearn.model_selection import KFold
 from sklearn.metrics import mean_squared_error
 
 
+def normalize(data):
+    data_min = data.min()
+    data_max = data.max()
+    return (data - data_min) / (data_max - data_min)
+
+
 # calculate the distance between values x1 and x2
 def distance(x1,x2):
     return np.sqrt((x1 - x2)**2)
@@ -874,20 +880,20 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
             print("Invalid input. Please enter a single integer greater than 0 or enter '0' to exit.")
             continue
 
-        
+    energy_ranges = []
     for i in range(ranges):
         energy_range_str = input('Energy (keV*100) range ' + str(i+1) + ' to be plotted in 2D? (min:max+1)')
-        energy_range = slice( *map(int, energy_range_str.split(':')))
+        energy_range[i] = slice( *map(int, energy_range_str.split(':')))
 
         # Plot 2D map of AOI 
-        d_element = AOI_data[:, :, energy_range]
+        d_element = AOI_data[:, :, energy_range[i]]
         element_data = np.sum(d_element, axis=(2))
 
         fig, ax = plt.subplots()
         divider = make_axes_locatable(ax)
         cax = divider.append_axes('right', size = '5%', pad = 0.05)
         
-        ax.set_title('Energies in range: ' + str(round(energy[energy_range].min(),3)) + '-' + str(round(energy[energy_range].max(),3)) + ' keV')
+        ax.set_title('Energies in range: ' + str(round(energy[energy_range[i]].min(),3)) + '-' + str(round(energy[energy_range[i]].max(),3)) + ' keV')
         ax.set_ylabel("y ($\mu$m)")
         ax.set_xlabel("x ($\mu$m)")
         im = ax.imshow(element_data, extent = [x_int.min(), x_int.max(), y_int.min(), y_int.max()], cmap='viridis')
@@ -895,6 +901,15 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
         
         fig.colorbar(im, cax=cax, orientation = 'vertical')
         plt.show()
+    
+    # Making RGB figure
+    if ranges == 3:
+        element_1 = normalize(AOI_data[:, :, energy_range[0]])
+        element_2 = normalize(AOI_data[:, :, energy_range[1]])
+        element_3 = normalize(AOI_data[:, :, energy_range[2]])
+        
+        
+        
         
         
 
@@ -1129,23 +1144,62 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
             continue
 
         
+    energy_ranges = []
     for i in range(ranges):
         energy_range_str = input('Energy (keV*100) range ' + str(i+1) + ' to be plotted in 2D? (min:max+1)')
-        energy_range = slice( *map(int, energy_range_str.split(':')))
+        energy_ranges.append(slice( *map(int, energy_range_str.split(':'))))
 
         # Plot 2D map of AOI 
-        d_element = AOI_data[:, :, energy_range]
+        d_element = AOI_data[:, :, energy_ranges[i]]
         element_data = np.sum(d_element, axis=(2))
 
         fig, ax = plt.subplots()
         divider = make_axes_locatable(ax)
         cax = divider.append_axes('right', size = '5%', pad = 0.05)
         
-        ax.set_title('Energies in range: ' + str(round(energy[energy_range].min(),3)) + '-' + str(round(energy[energy_range].max(),3)) + ' keV')
+        ax.set_title('Energies in range: ' + str(round(energy[energy_ranges[i]].min(),3)) + '-' + str(round(energy[energy_ranges[i]].max(),3)) + ' keV')
+        ax.set_ylabel("y ($\mu$m)")
+        ax.set_xlabel("x ($\mu$m)")
         im = ax.imshow(element_data, extent = [x_int.min(), x_int.max(), y_int.min(), y_int.max()], cmap='viridis')
         
         
         fig.colorbar(im, cax=cax, orientation = 'vertical')
+        plt.show()
+    
+    # Making RGB figure
+    if ranges == 3:
+        element_1 = normalize(AOI_data[:, :, energy_ranges[0]])
+        element_2 = normalize(AOI_data[:, :, energy_ranges[1]])
+        element_3 = normalize(AOI_data[:, :, energy_ranges[2]])
+
+        
+
+        fig, ax = plt.subplots()
+
+        # Plot each element with a different color map and alpha blending
+        cmap1 = plt.get_cmap('Reds')
+        cmap2 = plt.get_cmap('Blues')
+        cmap3 = plt.get_cmap('Greens')
+
+        # Plot each heatmap with a specific color and some transparency
+        heatmap1 = ax.imshow(np.sum(element_1, axis = 2), extent = [x_int.min(), x_int.max(), y_int.min(), y_int.max()], cmap=cmap1)
+        heatmap2 = ax.imshow(np.sum(element_2, axis = 2), extent = [x_int.min(), x_int.max(), y_int.min(), y_int.max()], cmap=cmap2)
+        heatmap3 = ax.imshow(np.sum(element_3, axis = 2), extent = [x_int.min(), x_int.max(), y_int.min(), y_int.max()], cmap=cmap3)
+
+        element_1_label = input('Enter symbol for element 1:')
+        element_2_label = input("Enter symbol for element 2:")
+        element_3_label = input("Enter symbol for element 3:")
+
+        # Create a legend indicating the color associated with each dataset
+        red_patch = mpatches.Patch(color='red', label= element_1_label + ' (Red)')
+        blue_patch = mpatches.Patch(color='blue', label= element_2_label + ' (Blue)')
+        green_patch = mpatches.Patch(color='green', label= element_3_label + ' (Green)')
+        
+        # Place the legend outside the plot
+        plt.legend(handles=[red_patch, blue_patch, green_patch], loc='center left', bbox_to_anchor=(1, 0.5))
+        
+        ax.set_ylabel("y ($\mu$m)")
+        ax.set_xlabel("x ($\mu$m)")
         plt.show()
 
    
