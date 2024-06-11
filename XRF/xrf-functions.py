@@ -888,6 +888,8 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
         cax = divider.append_axes('right', size = '5%', pad = 0.05)
         
         ax.set_title('Energies in range: ' + str(round(energy[energy_range].min(),3)) + '-' + str(round(energy[energy_range].max(),3)) + ' keV')
+        ax.set_ylabel("y ($\mu$m)")
+        ax.set_xlabel("x ($\mu$m)")
         im = ax.imshow(element_data, extent = [x_int.min(), x_int.max(), y_int.min(), y_int.max()], cmap='viridis')
         
         
