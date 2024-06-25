@@ -506,11 +506,9 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     # Position axes
     x_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),data.shape[1])
     y_pos = np.linspace(pos_data[1].min(),pos_data[1].max(),data.shape[1])
-    detector_area = distance(min(x_pos),max(x_pos))*distance(min(y_pos),max(y_pos)) # units of micron squared
     
-    # Calculating ion flux from average of i0
-    ion_flux = np.mean(ion_chamber_data)/detector_area
-    
+    # normalize data by ion_chmaber_data(i0)
+    data = data/ion_chamber_data[:,:,np.newaxis]
 
     # Use incident X-ray energy to define energy range of interest 
     # incident_wavelength = 1.2398e-9/incident_energy # convert incident energy to wavelength (hc/lambda)
@@ -523,7 +521,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
 
 
     # Total average spectrum
-    avg_data = np.mean(data, axis = (0,1))/ion_flux # normalize by ion chamber flux
+    avg_data = np.mean(data, axis = (0,1)) # normalize by ion chamber flux
     avg_data = avg_data[min_idx:max_idx]
     
     
@@ -634,7 +632,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
  
    
     # Avg spectrum in selected area
-    AOI = np.mean(AOI_data, axis=(0,1))/ion_flux
+    AOI = np.mean(AOI_data, axis=(0,1))
     AOI = AOI[min_idx:max_idx]
     energy_int = energy[min_idx:max_idx]
     
@@ -659,7 +657,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
      
        
         # Avg background spectrum in selected area
-        background = np.mean(bkg_data, axis=(0,1))/ion_flux
+        background = np.mean(bkg_data, axis=(0,1))
         background = background[min_idx:max_idx]
         
 
@@ -954,13 +952,9 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
     # Position axes
     x_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),data.shape[1])
     y_pos = np.linspace(pos_data[1].min(),pos_data[1].max(),data.shape[1])
-    detector_area = distance(min(x_pos),max(x_pos))*distance(min(y_pos),max(y_pos)) # units of micron squared
-
     
-    # Calculating ion flux from average of i0
-    ion_flux = np.mean(ion_chamber_data)/detector_area
-    
-    
+    # normalize data by ion_chmaber_data(i0)
+    data = data/ion_chamber_data[:,:,np.newaxis]
 
     ########## Use incident X-ray energy to define energy range of interest ##########
     # incident_wavelength = 1.2398e-9/incident_energy # convert incident energy to wavelength (hc/lambda)
@@ -1006,7 +1000,7 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
     
     
     ########## Total average spectrum ##########
-    avg_data = np.mean(data, axis = (0,1))/ion_flux # normalize by ion chamber flux
+    avg_data = np.mean(data, axis = (0,1))
     avg_data = avg_data[min_idx:max_idx]
     
     
@@ -1016,7 +1010,7 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
     
     
     # Sum spectrum in selected area
-    AOI = np.mean(AOI_data, axis=(0,1))/ion_flux
+    AOI = np.mean(AOI_data, axis=(0,1))
     AOI = AOI[min_idx:max_idx]
     energy_int = energy[min_idx:max_idx]
     
@@ -1037,7 +1031,7 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
         bkg_data = data[BKG_y, BKG_x, :]
         
         # Avg background spectrum in selected area
-        background = np.mean(bkg_data, axis=(0,1))/ion_flux
+        background = np.mean(bkg_data, axis=(0,1))
         background = background[min_idx:max_idx]
         
 
@@ -1225,6 +1219,7 @@ def extract_detector_data(filename):
             group = file[group_name]
             attributes = dict(group.attrs)
             incident_energy = attributes['instrument_mono_incident_energy'] # keV
+            ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
         else:
             print(f"Group '{group_name}' not found in the HDF5 file.")
 
@@ -1242,9 +1237,13 @@ def extract_detector_data(filename):
     # whole positions
     x_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),data.shape[1])
     y_pos = np.linspace(pos_data[1].min(),pos_data[1].max(),data.shape[1])
+   
+    # normalize data by ion_chmaber_data(i0)
+    data = data/ion_chamber_data[:,:,np.newaxis]
+
     
     ########## Detector data ##########
-    detector_data = np.sum(data,axis = (2))
+    detector_data = np.mean(data,axis = (2))
     detector_2D_map_fig = go.Figure(data = go.Heatmap(z = detector_data, colorscale = 'Viridis', colorbar = {'exponentformat': 'e'}))
     detector_2D_map_fig.update_layout(title_text = 'Summed XRF Map for <br>' + filename[-26:-13]+' @ '+str(incident_energy)+' keV', 
                                       title_x = 0.5,
@@ -1323,14 +1322,12 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
     # Position axes
     x_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),standard_data.shape[1])
     y_pos = np.linspace(pos_data[1].min(),pos_data[1].max(),standard_data.shape[1])
-    detector_area = distance(min(x_pos),max(x_pos))*distance(min(y_pos),max(y_pos)) # units of micron squared
     
-    # Calculating ion flux from average of i0
-    ion_flux = np.mean(ion_chamber_data)/detector_area
-    
+    # normalize data by ion_chmaber_data(i0)
+    standard_data = standard_data/ion_chamber_data[:,:,np.newaxis]
     
     # Total avg spectrum
-    standard_avg_data = np.mean(standard_data, axis = (0,1))/ion_flux # normalize by ion chamber
+    standard_avg_data = np.mean(standard_data, axis = (0,1))
     standard_avg_data = standard_avg_data[min_idx:max_idx]
     energy_int = energy[min_idx:max_idx]
     
@@ -1354,15 +1351,12 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
     # Position axes
     x_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),background_data.shape[1])
     y_pos = np.linspace(pos_data[1].min(),pos_data[1].max(),background_data.shape[1])
-    detector_area = distance(min(x_pos),max(x_pos))*distance(min(y_pos),max(y_pos)) # units of micron squared
     
-    
-    # Calculating ion flux from average of i0
-    ion_flux = np.mean(ion_chamber_data)/detector_area
-    
+    # normalize data by ion_chmaber_data(i0)
+    background_data = background_data/ion_chamber_data[:,:,np.newaxis]
     
     # Total avg spectrum
-    background_avg_data = np.mean(background_data, axis = (0,1))/ion_flux # normalize by ion chamber flux
+    background_avg_data = np.mean(background_data, axis = (0,1))
     background_avg_data = background_avg_data[min_idx:max_idx]
     
     
@@ -1449,13 +1443,10 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
         air_pos_data = file['xrfmap/positions/pos'][:]
         air_ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
 
-    air_detector_area = distance(air_pos_data[0].min(),air_pos_data[0].max())*distance(air_pos_data[1].min(),air_pos_data[1].max())
-    
-    # Calculating ion flux from average of i0
-    air_ion_flux = np.mean(air_ion_chamber_data)/air_detector_area # normalized by air ion chamber flux
+     # normalize data by ion_chmaber_data(i0)
+    open_air_data = open_air_data/air_ion_chamber_data[:,:,np.newaxis]
 
-
-    open_air_avg_data = np.mean(open_air_data, axis = (0,1))/air_ion_flux
+    open_air_avg_data = np.mean(open_air_data, axis = (0,1))
     open_air_avg_data = open_air_avg_data[min_idx:max_idx]
 
     ## Fit gaussian to region corresponding to element of interest
