@@ -753,6 +753,13 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     
     # Plot total averaged spectrum 
     fig1.add_trace(go.Scatter(x = energy_int, y = avg_data, mode = 'lines', name = 'Avg Spectrum'))
+    
+    if 'avg_blank_data' in vars():
+        # Plot avg blank spectrum
+        fig1.add_trace(go.Scatter(x = energy_int, y = avg_blank_data, mode = 'lines', name = 'Avg Blank Spectrum'))
+
+        # Plot baseline spectrum
+        fig1.add_trace(go.Scatter(x = energy_int, y = baseline, mode = 'lines', name = 'Baseline Spectrum'))
 
 
     if 'background' in vars():
