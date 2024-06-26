@@ -42,10 +42,10 @@ from sklearn.metrics import mean_squared_error
 # * good for FIJI/ImageJ analysis
 def normalization(file):
     with h5py.File(coarse_filename4, 'a') as h5file:
-    counts = h5file['xrfmap/detsum/counts'][:]
-    ion_chamber_data = h5file['xrfmap/scalers/val'][:, :, 0]
-    counts_norm = counts/ion_chamber_data[:, :, np.newaxis]
-    dataset = h5file.create_dataset('xrfmap/detsum/counts_norm',data = counts_norm)
+        counts = h5file['xrfmap/detsum/counts'][:]
+        ion_chamber_data = h5file['xrfmap/scalers/val'][:, :, 0]
+        counts_norm = counts/ion_chamber_data[:, :, np.newaxis]
+        dataset = h5file.create_dataset('xrfmap/detsum/counts_norm',data = counts_norm)
 
 
 def normalize(data):
