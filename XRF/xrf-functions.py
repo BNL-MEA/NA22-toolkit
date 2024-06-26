@@ -532,12 +532,14 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
 
 
     # Total average spectrum
-    avg_data = np.mean(data, axis = (0,1)) # normalize by ion chamber flux
+    avg_data = np.mean(data, axis = (0,1)) 
     avg_data = avg_data[min_idx:max_idx]
-    
+   
     
     ########## Plotting whole detector view to identify AOI ##########
-    temp = np.sum(data,axis = (2))
+    # determine max intensity of each pixel to get better particle resolution
+    max_int = np.max(data, axis = 2, keepdims = True)
+    temp = np.sum(max_int, axis = (2))
     
     detector_2D_map_fig = go.Figure(data = go.Heatmap(z = temp, colorscale = 'Viridis', colorbar = {'exponentformat': 'e'}))
     detector_2D_map_fig.update_layout(title_text = 'Summed XRF Map for <br>' + filename[-26:-13]+' @ '+str(incident_energy)+' keV', 
@@ -597,13 +599,14 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
 
             # extracting this energy range from the hdf file data
             element_det_data = data[:, :, energy_range]
-            summed_element_det_data = np.sum(element_det_data, axis=(2))
+            element_det_data_max_int = np.max(element_det_data, axis = 2, keepdims = True)
+            summed_element_det_data = np.sum(element_det_data_max_int, axis=(2))
             
             if bad_pixels.lower() == "yes":
                 k = int(nbad_pixels) # number of values to be extracted 
                 idx_flat = np.argpartition(summed_element_det_data.flatten(),k)[:k] # index of k lowest values 
                 idx_2d = np.unravel_index(idx_flat,summed_element_det_data.shape)
-                summed_element_det_data[idx_2d] = np.mean(summed_element_det_data) # new detecotr data without dead pixels 
+                summed_element_det_data[idx_2d] = np.mean(summed_element_det_data) # new detector data without dead pixels 
 
             # plotting detector map highlighting element of interest's signal
             element_2D_map_fig.add_trace(go.Heatmap(z = summed_element_det_data), row = count + 1, col = 1 )
@@ -714,6 +717,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     # Plot total averaged spectrum 
     fig1.add_trace(go.Scatter(x = energy_int, y = avg_data, mode = 'lines', name = 'Avg Spectrum'))
 
+
     if 'background' in vars():
         # Plot background spectrum        
         fig1.add_trace(go.Scatter(x = energy_int, y = background, mode = 'lines', name = 'Background Spectrum'))
@@ -739,6 +743,15 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     peak_props = input('Change peak thresholds for prominence, height, and/or distance (Yes or No)?')
     while True:
         if peak_props.lower() == 'no':
+            ########## Identify elements ##########
+            # identify fluorescent line energy that most closely matches the determined peaks
+            tolerance = 1.25 # allowed difference in percent
+            elements = background_elements + sample_elements
+            matched_peaks, _ = identify_element_match(elements, energy_int[peaks]*1000, tolerance, incident_energy*1000)
+            # Plotting vertical lines for matched peaks and labeled with element symbol
+            for i in range(len(matched_peaks)):
+                fig1.add_vline(x = matched_peaks[i][3]/1000, line_width = 1.5, line_dash = 'dash', annotation_text = matched_peaks[i][1]+'_'+matched_peaks[i][2])
+            fig1.show()
             break
         if peak_props.lower() == 'yes':
             user_input = input("Enter new values for prominence (" + str(prom) + "), height(" + str(tall) + "), and distance(" + str(dist) + ") (comma-separated), 'no' to exit: ")
@@ -896,7 +909,8 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
 
         # Plot 2D map of AOI 
         d_element = AOI_data[:, :, energy_range[i]]
-        element_data = np.sum(d_element, axis=(2))
+        d_element_max_int = np.max(d_element, axis = 2, keepdims = True) 
+        element_data = np.sum(d_element_max_int, axis=(2))
 
         fig, ax = plt.subplots()
         divider = make_axes_locatable(ax)
@@ -1254,7 +1268,8 @@ def extract_detector_data(filename):
 
     
     ########## Detector data ##########
-    detector_data = np.mean(data,axis = (2))
+    max_int = np.max(data, axis = 2, keepdims = True)
+    detector_data = np.sum(max_int,axis = (2))
     detector_2D_map_fig = go.Figure(data = go.Heatmap(z = detector_data, colorscale = 'Viridis', colorbar = {'exponentformat': 'e'}))
     detector_2D_map_fig.update_layout(title_text = 'Summed XRF Map for <br>' + filename[-26:-13]+' @ '+str(incident_energy)+' keV', 
                                       title_x = 0.5,
