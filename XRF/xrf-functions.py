@@ -1131,10 +1131,8 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
         AOI_bkg_sub = AOI_bkg_sub + baseline
     else:
         blank_filename = blank_file
-        if blank_filename.lower() == 'no':
-            AOI_bkg_sub = AOI
-        else: 
-            with h5py.File(blank_filename, 'r') as file:
+        if blank_filename:
+             with h5py.File(blank_filename, 'r') as file:
                 blank_data = file['xrfmap/detsum/counts'][:]
                 blank_ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
                 group_name = 'xrfmap/scan_metadata'
@@ -1168,6 +1166,10 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
 
             # add baseline to AOI spectrum
             AOI_bkg_sub = AOI_bkg_sub + baseline
+            
+        else: 
+            AOI_bkg_sub = AOI
+           
     
 
     ########## Find peaks in data using parameter thresholds ##########
