@@ -1132,7 +1132,7 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
     else:
         blank_filename = blank_file
         if blank_filename:
-             with h5py.File(blank_filename, 'r') as file:
+            with h5py.File(blank_filename, 'r') as file:
                 blank_data = file['xrfmap/detsum/counts'][:]
                 blank_ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
                 group_name = 'xrfmap/scan_metadata'
