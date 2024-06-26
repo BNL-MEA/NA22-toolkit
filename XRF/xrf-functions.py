@@ -1018,7 +1018,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
 #     3. peak_fit_params: parameters used to define the gaussian fit of peaks in background subtracted partilce spectrum
 #     4. x_pos, y_pos: x and y position of the detector image location based on the sample stage
 #     5. matched_peaks: peaks matched to an element known to be present
-def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, prom, height, dist, bad_pixels, error_peaks, blank_file):
+def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, prom, height, dist, bad_pixels, error_peaks, blank_file = None):
     ########## Load data filenin variable ##########
     with h5py.File(filename, 'r') as file:
         data = file['xrfmap/detsum/counts'][:]
