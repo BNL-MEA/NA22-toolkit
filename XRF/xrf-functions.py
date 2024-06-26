@@ -684,8 +684,45 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
         # add baseline to AOI spectrum
         AOI_bkg_sub = AOI_bkg_sub + baseline
     else:
-   
-        AOI_bkg_sub = AOI
+        blank_filename = input("Input blank file data at same incident energy as sample data (if yes input variable containing file info, else enter no)?")
+        if blank_filename.lower() == 'no':
+            AOI_bkg_sub = AOI
+        else: 
+            with h5py.File(blank_filename, 'r') as file:
+                blank_data = file['xrfmap/detsum/counts'][:]
+                blank_ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
+                group_name = 'xrfmap/scan_metadata'
+                if group_name in file:
+                    group = file[group_name]
+                    attributes = dict(group.attrs)
+                    blank_incident_energy = attributes['instrument_mono_incident_energy'] # keV
+                    blank_ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
+                else:
+                    print(f"Group '{group_name}' not found in the HDF5 file.")
+            
+            # normalize data by ion_chmaber_data(i0)
+            blank_data = blank_data/blank_ion_chamber_data[:,:,np.newaxis]
+
+            # Use incident X-ray energy to define energy range of interest 
+            # incident_wavelength = 1.2398e-9/incident_energy # convert incident energy to wavelength (hc/lambda)
+            # compton_wavelength = 4.86e-12 + incident_wavelength # determine compton wavelength using maximum wavelength differential plus incident 
+            # max_energy = 1.2398e-9/compton_wavelength  # convert compton wavelength to energy and set the maximum energy to about the compton peak 
+            min_idx = max([i for i, v in enumerate(energy) if v <= min_energy])
+            max_idx = min([i for i, v in enumerate(energy) if v >= incident_energy])
+
+
+            # Total average spectrum
+            avg_blank_data = np.mean(blank_data, axis = (0,1)) 
+            avg_blank_data = avg_blank_data[min_idx:max_idx]
+            
+            # Background subtracted AOI
+            baseline = arpls(avg_blank_data) # Baseline of AOI spectrum
+            AOI_bkg_sub = AOI - avg_blank_data
+            AOI_bkg_sub[AOI_bkg_sub <= 0] = 0
+
+            # add baseline to AOI spectrum
+            AOI_bkg_sub = AOI_bkg_sub + baseline
+            
     
     
 
@@ -784,6 +821,13 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
             # Plot total avg spectrum 
             fig1.add_trace(go.Scatter(x = energy_int, y = avg_data, mode = 'lines', name = 'Avg Spectrum'))
             
+            if 'avg_blank_data' in vars():
+                # Plot avg blank spectrum
+                fig1.add_trace(go.Scatter(x = energy_int, y = avg_blank_data, mode = 'lines', name = 'Avg Blank Spectrum'))
+
+                # Plot baseline spectrum
+                fig1.add_trace(go.Scatter(x = energy_int, y = baseline, mode = 'lines', name = 'Baseline Spectrum'))
+            
             if 'background' in vars():
                 # Plot background spectrum
                 fig1.add_trace(go.Scatter(x = energy_int, y = background, mode = 'lines', name = 'Background Spectrum'))
@@ -853,6 +897,14 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
                 
     # Plot total avg spectrum 
     fig1.add_trace(go.Scatter(x = energy_int, y = avg_data, mode = 'lines', name = 'Avg Spectrum'))
+    
+    if 'avg_blank_data' in vars():
+        # Plot avg blank spectrum
+        fig1.add_trace(go.Scatter(x = energy_int, y = avg_blank_data, mode = 'lines', name = 'Avg Blank Spectrum'))
+
+        # Plot baseline spectrum
+        fig1.add_trace(go.Scatter(x = energy_int, y = baseline, mode = 'lines', name = 'Baseline Spectrum'))
+                
     if 'background' in vars():
         # Plot background spectrum
         fig1.add_trace(go.Scatter(x = energy_int, y = background, mode = 'lines', name = 'Background Spectrum'))
@@ -1070,7 +1122,44 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
         # add baseline to AOI spectrum
         AOI_bkg_sub = AOI_bkg_sub + baseline
     else:
-        AOI_bkg_sub = AOI
+        blank_filename = input("Input blank file data at same incident energy as sample data (if yes input variable containing file info, else enter no)?")
+        if blank_filename.lower() == 'no':
+            AOI_bkg_sub = AOI
+        else: 
+            with h5py.File(blank_filename, 'r') as file:
+                blank_data = file['xrfmap/detsum/counts'][:]
+                blank_ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
+                group_name = 'xrfmap/scan_metadata'
+                if group_name in file:
+                    group = file[group_name]
+                    attributes = dict(group.attrs)
+                    blank_incident_energy = attributes['instrument_mono_incident_energy'] # keV
+                    blank_ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
+                else:
+                    print(f"Group '{group_name}' not found in the HDF5 file.")
+            
+            # normalize data by ion_chmaber_data(i0)
+            blank_data = blank_data/blank_ion_chamber_data[:,:,np.newaxis]
+
+            # Use incident X-ray energy to define energy range of interest 
+            # incident_wavelength = 1.2398e-9/incident_energy # convert incident energy to wavelength (hc/lambda)
+            # compton_wavelength = 4.86e-12 + incident_wavelength # determine compton wavelength using maximum wavelength differential plus incident 
+            # max_energy = 1.2398e-9/compton_wavelength  # convert compton wavelength to energy and set the maximum energy to about the compton peak 
+            min_idx = max([i for i, v in enumerate(energy) if v <= min_energy])
+            max_idx = min([i for i, v in enumerate(energy) if v >= incident_energy])
+
+
+            # Total average spectrum
+            avg_blank_data = np.mean(blank_data, axis = (0,1)) 
+            avg_blank_data = avg_blank_data[min_idx:max_idx]
+            
+            # Background subtracted AOI
+            baseline = arpls(avg_blank_data) # Baseline of AOI spectrum
+            AOI_bkg_sub = AOI - avg_blank_data
+            AOI_bkg_sub[AOI_bkg_sub <= 0] = 0
+
+            # add baseline to AOI spectrum
+            AOI_bkg_sub = AOI_bkg_sub + baseline
     
 
     ########## Find peaks in data using parameter thresholds ##########
@@ -1116,6 +1205,13 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
                 
     # Plot total avg spectrum 
     fig1.add_trace(go.Scatter(x = energy_int, y = avg_data, mode = 'lines', name = 'Avg Spectrum'))
+    
+    if 'avg_blank_data' in vars():
+        # Plot avg blank spectrum
+        fig1.add_trace(go.Scatter(x = energy_int, y = avg_blank_data, mode = 'lines', name = 'Avg Blank Spectrum'))
+
+        # Plot baseline spectrum
+        fig1.add_trace(go.Scatter(x = energy_int, y = baseline, mode = 'lines', name = 'Baseline Spectrum'))
     
     if 'background' in vars():
         # Plot background spectrum
