@@ -1052,7 +1052,8 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
 
 
     ########## Detector data ##########
-    detector_data = np.sum(data,axis = (2))
+    max_int = np.max(data, axis = 2, keepdims = True)
+    detector_data = np.sum(max_int,axis = (2))
     detector_2D_map_fig = go.Figure(data = go.Heatmap(z = detector_data, colorscale = 'Viridis', colorbar = {'exponentformat': 'e'}))
     detector_2D_map_fig.update_layout(title_text = 'Summed XRF Map for <br>' + filename[-26:-13]+' @ '+str(incident_energy)+' keV', 
                                       title_x = 0.5,
