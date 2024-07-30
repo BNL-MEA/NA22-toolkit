@@ -406,7 +406,7 @@ r"""
 def arpls(y, lam=1e4, ratio=0.01, itermax=1000):
     # remove Nans and/or infs and replace with 0
     y = np.nan_to_num(y, nan = 0.0, posinf = 0.0, neginf = 0.0)
-    
+    print('Nans and infs removed')
     N = len(y)
 #  D = sparse.csc_matrix(np.diff(np.eye(N), 2))
     D = sparse.eye(N, format='csc')
