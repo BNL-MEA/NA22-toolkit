@@ -404,6 +404,8 @@ r"""
     """
 
 def arpls(y, lam=1e4, ratio=0.01, itermax=1000):
+    # remove Nans and/or infs and replace with 0
+    y = np.nan_to_num(y, nan = 0.0, posinf = 0.0, neginf = 0.0)
     
     N = len(y)
 #  D = sparse.csc_matrix(np.diff(np.eye(N), 2))
@@ -1082,6 +1084,8 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
                                           yaxis = dict(title = 'Y-axis'))
         
         detector_2D_map_fig.show()
+        
+    
     
     
     ########## Total average spectrum ##########
@@ -1094,7 +1098,7 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
     AOI_data = data[AOI_y, AOI_x, :]
     
     
-    # Sum spectrum in selected area
+    # Avg spectrum in selected area
     AOI = np.mean(AOI_data, axis=(0,1))
     AOI = AOI[min_idx:max_idx]
     energy_int = energy[min_idx:max_idx]
