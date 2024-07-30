@@ -404,9 +404,6 @@ r"""
     """
 
 def arpls(y, lam=1e4, ratio=0.01, itermax=1000):
-    # remove Nans and/or infs and replace with 0
-    y = np.nan_to_num(y, nan = 0.0, posinf = 0.0, neginf = 0.0)
-    print('Nans and infs removed')
     N = len(y)
 #  D = sparse.csc_matrix(np.diff(np.eye(N), 2))
     D = sparse.eye(N, format='csc')
@@ -417,7 +414,8 @@ def arpls(y, lam=1e4, ratio=0.01, itermax=1000):
     w = np.ones(N)
     for i in range(itermax):
         W = sparse.diags(w, 0, shape=(N, N))
-        WH = sparse.csc_matrix(W + H)
+        WH = sparse.csc_matrix(W + H)        
+        WH = = np.nan_to_num(WH, nan = 0.0, posinf = 0.0, neginf = 0.0) # remove Nans and/or infs and replace with 0
         C = sparse.csc_matrix(cholesky(WH.todense()))
         z = spsolve(C, spsolve(C.T, w * y))
         d = y - z
