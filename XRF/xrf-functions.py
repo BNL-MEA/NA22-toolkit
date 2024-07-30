@@ -964,10 +964,10 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     energy_ranges = []
     for i in range(ranges):
         energy_range_str = input('Energy (keV*100) range ' + str(i+1) + ' to be plotted in 2D? (min:max+1)')
-        energy_range[i] = slice( *map(int, energy_range_str.split(':')))
+        energy_range[i] = input_to_slice(energy_range_str)
 
         # Plot 2D map of AOI 
-        d_element = AOI_data[:, :, energy_range[i]]
+        d_element = AOI_data[:, :, energy_range[i][0]:energy_range[i][1]]
         d_element_max_int = np.max(d_element, axis = 2, keepdims = True) 
         element_data = np.sum(d_element_max_int, axis=(2))
 
@@ -986,9 +986,9 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     
     # Making RGB figure
     if ranges == 3:
-        element_1 = normalize(AOI_data[:, :, energy_range[0]])
-        element_2 = normalize(AOI_data[:, :, energy_range[1]])
-        element_3 = normalize(AOI_data[:, :, energy_range[2]])
+        element_1 = normalize(AOI_data[:, :, energy_range[0].min():energy_range[0].max())
+        element_2 = normalize(AOI_data[:, :, energy_range[1].min():energy_range[1].max())
+        element_3 = normalize(AOI_data[:, :, energy_range[2].min():energy_range[2].max())
         
         
         
