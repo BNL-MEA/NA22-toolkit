@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.patches as patches
 from plotly.subplots import make_subplots
-from matplotlib.colormaps import get_cmap
+from matplotlib.cm import get_cmap
 
 # X-ray database
 import xraydb as xdb
