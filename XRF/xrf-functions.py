@@ -6,6 +6,8 @@ import pandas as pd
 import numpy as np
 import xarray as xr
 from itertools import compress
+import os
+
 
 
 # Fitting
@@ -16,6 +18,7 @@ from scipy import sparse
 from time import perf_counter
 from scipy.signal import find_peaks, peak_prominences, peak_widths
 from scipy.stats import linregress
+from sklearn.metrics import r2_score
 
 
 # Plotting
@@ -591,7 +594,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
             element_energy = np.array([row for row in element_energy if row[2] == element_energy[0,2]]) # select only the first edge available
             max_idx_element = np.argmax(element_energy[:,1]) # find maximum intensity of all edge lines
 
-            # setting up an energy range of interest surrounding the highest intensity line i nthe first edge available
+            # setting up an energy range of interest surrounding the highest intensity line in the first edge available
             energy_range_minima = round((float(element_energy[max_idx_element,0]) - 500)/10) 
             energy_range_maxima = round((float(element_energy[max_idx_element,0]) + 500)/10)
             energy_range = slice(energy_range_minima, energy_range_maxima)
