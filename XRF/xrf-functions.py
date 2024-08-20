@@ -1672,6 +1672,36 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
     return fig, cal_eq, sum_open_air_integral
 
 
+def quantitative_analysis_curve(intensity_data, element_mass):
+    # determine calibration curve function
+    cal_eq = np.poly1d(np.polyfit(intensity_data,element_mass_data,1))
+    
+    # plotting calibration curve
+    x = np.linspace(0,intensity_data.max())
+    y = cal_eq(x)
+    
+    # caculate relative fit 
+    r2 = r2_score(element_mass_data,cal_eq(intensity_data))
+    
+    # ax.scatter(intensity_data, element_mass_data, color = 'red', label = 'Standard data')
+    # ax.plot(x, y, label = 'Line of Best Fit')
+    # ax.legend(loc='lower right')
+    plt.scatter(intensity_data, element_mass_data, color = 'red', label = 'Standard data')
+    plt.plot(x, y, label = 'Line of Best Fit')
+    plt.legend(loc='lower right')
+    plt.xlabel('Integral Intensity (counts)', fontsize = 16)
+    plt.ylabel('Mass (pg)', fontsize = 16)
+    plt.xticks(fontsize = 14)
+    plt.yticks(fontsize = 14)
+    plt.title('Quantitative Analysis Curve', fontsize = 18)
+    
+    # create textbox containing calibration function and R2 value
+    plt.text(0.05, 0.95, 'Calibration Function:'+str(cal_eq)+'\n$R^2$='+"{:.6f}".format(r2),
+             transform=plt.gca().transAxes,
+             bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5', alpha=0.8, linewidth=2),
+             verticalalignment='top')
+    plt.show()
 
+    return cal_eq, r2
 
 
