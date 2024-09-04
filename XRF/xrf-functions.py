@@ -519,8 +519,8 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
             print(f"Group '{group_name}' not found in the HDF5 file.")
     
     # Position axes
-    x_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),data.shape[0])
-    y_pos = np.linspace(pos_data[1].min(),pos_data[1].max(),data.shape[1])
+    x_pos = np.linspace(pos_data[1].min(),pos_data[1].max(),data.shape[1])
+    y_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),data.shape[0])
     
     # normalize data by ion_chmaber_data(i0)
     if normalize:
@@ -1067,8 +1067,8 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
             print(f"Group '{group_name}' not found in the HDF5 file.")
     
     # Position axes
-    x_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),data.shape[0])
-    y_pos = np.linspace(pos_data[1].min(),pos_data[1].max(),data.shape[1])
+    x_pos = np.linspace(pos_data[1].min(),pos_data[1].max(),data.shape[1])
+    y_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),data.shape[0])
     
     # normalize data by ion_chmaber_data(i0)
     if normalize:
@@ -1138,8 +1138,8 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
     
     ########## Position axes ##########
     # whole positions
-    x_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),data.shape[0])
-    y_pos = np.linspace(pos_data[1].min(),pos_data[1].max(),data.shape[1])
+    x_pos = np.linspace(pos_data[1].min(),pos_data[1].max(),data.shape[1])
+    y_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),data.shape[0])
 
     # AOI positions
     y_int = y_pos[AOI_y]
@@ -1403,8 +1403,8 @@ def extract_detector_data(filename, normalize = True):
 
     ########## Position axes ##########
     # whole positions
-    x_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),data.shape[0])
-    y_pos = np.linspace(pos_data[1].min(),pos_data[1].max(),data.shape[1])
+    x_pos = np.linspace(pos_data[1].min(),pos_data[1].max(),data.shape[1])
+    y_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),data.shape[0])
    
     # normalize data by ion_chmaber_data(i0)
     if normalize:    
@@ -1490,8 +1490,8 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
     
     
     # Position axes
-    x_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),standard_data.shape[0])
-    y_pos = np.linspace(pos_data[1].min(),pos_data[1].max(),standard_data.shape[1])
+    x_pos = np.linspace(pos_data[1].min(),pos_data[1].max(),standard_data.shape[1])
+    y_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),standard_data.shape[0])
     
     # normalize data by ion_chmaber_data(i0)
     standard_data = standard_data/ion_chamber_data[:,:,np.newaxis]
@@ -1519,8 +1519,8 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
             print(f"Group '{group_name}' not found in the HDF5 file.")
     
     # Position axes
-    x_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),background_data.shape[0])
-    y_pos = np.linspace(pos_data[1].min(),pos_data[1].max(),background_data.shape[1])
+    x_pos = np.linspace(pos_data[1].min(),pos_data[1].max(),background_data.shape[1])
+    y_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),background_data.shape[0])
     
     # normalize data by ion_chmaber_data(i0)
     background_data = background_data/ion_chamber_data[:,:,np.newaxis]
