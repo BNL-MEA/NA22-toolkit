@@ -501,18 +501,20 @@ def peak_fitting(x, y, peaks, window):
 #     2. fig1: HTML figure containing all relevant data/information processed that
 #        can be used later to plot the results        
 #     3. peak_fit_params: parameters used to define the gaussian fit of peaks in background subtracted partilce spectrum
-def AOI_particle_analysis(filename, min_energy, sample_elements, background_elements):
+def AOI_particle_analysis(filename, min_energy, sample_elements, background_elements, normalize = True):
     ########## Load data filenin variable ##########
     with h5py.File(filename, 'r') as file:
         data = file['xrfmap/detsum/counts'][:]
         pos_data = file['xrfmap/positions/pos'][:]
-        ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
+        if normalize:
+            ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
         group_name = 'xrfmap/scan_metadata'
         if group_name in file:
             group = file[group_name]
             attributes = dict(group.attrs)
             incident_energy = attributes['instrument_mono_incident_energy'] # keV
-            ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
+            if normalize:
+                ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
         else:
             print(f"Group '{group_name}' not found in the HDF5 file.")
     
@@ -521,7 +523,8 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     y_pos = np.linspace(pos_data[1].min(),pos_data[1].max(),data.shape[1])
     
     # normalize data by ion_chmaber_data(i0)
-    data = data/ion_chamber_data[:,:,np.newaxis]
+    if normalize:
+        data = data/ion_chamber_data[:,:,np.newaxis]
 
     # Use incident X-ray energy to define energy range of interest 
     # incident_wavelength = 1.2398e-9/incident_energy # convert incident energy to wavelength (hc/lambda)
