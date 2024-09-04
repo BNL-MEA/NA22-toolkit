@@ -1376,7 +1376,7 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
 # * Outputs
 #     1. detector_data
 #     2. x_pos, y_pos: x and y positions extracted from hdf5 file
-def extract_detector_data(filename):
+def extract_detector_data(filename, normalize = True):
     ########## Load data file in variable ##########
     with h5py.File(filename, 'r') as file:
         data = file['xrfmap/detsum/counts'][:]
@@ -1386,7 +1386,8 @@ def extract_detector_data(filename):
             group = file[group_name]
             attributes = dict(group.attrs)
             incident_energy = attributes['instrument_mono_incident_energy'] # keV
-            ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
+            if normalize:
+                ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
         else:
             print(f"Group '{group_name}' not found in the HDF5 file.")
 
@@ -1406,7 +1407,8 @@ def extract_detector_data(filename):
     y_pos = np.linspace(pos_data[1].min(),pos_data[1].max(),data.shape[1])
    
     # normalize data by ion_chmaber_data(i0)
-    data = data/ion_chamber_data[:,:,np.newaxis]
+    if normalize:    
+        data = data/ion_chamber_data[:,:,np.newaxis]
 
     
     ########## Detector data ##########
