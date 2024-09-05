@@ -1083,6 +1083,8 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
     # Position axes
     x_pos = np.linspace(pos_data[1].min(),pos_data[1].max(),data.shape[1])
     y_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),data.shape[0])
+    if Sigray:
+        y_pos = y_pos[::-1]
     
     # normalize data by ion_chmaber_data(i0)
     if not Sigray:
@@ -1154,9 +1156,6 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
     
     
     ########## Position axes ##########
-    # whole positions
-    x_pos = np.linspace(pos_data[1].min(),pos_data[1].max(),data.shape[1])
-    y_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),data.shape[0])
 
     # AOI positions
     y_int = y_pos[AOI_y]
@@ -1432,6 +1431,8 @@ def extract_detector_data(filename, Sigray = False):
     # whole positions
     x_pos = np.linspace(pos_data[1].min(),pos_data[1].max(),data.shape[1])
     y_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),data.shape[0])
+    if Sigray:
+        y_pos = y_pos[::-1]
    
     # normalize data by ion_chmaber_data(i0)
     if not Sigray:    
