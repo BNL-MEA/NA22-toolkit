@@ -555,7 +555,8 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
                                       font = dict(size = 20),
                                       xaxis = dict(title = 'X-axis'),
                                       yaxis = dict(title = 'Y-axis'))
-    
+    if Sigray:
+        detector.update_layout(yaxis=dict(autorange='reversed'))
     detector_2D_map_fig.show()
 
     ########## Handling bad pixels ##########
@@ -577,7 +578,8 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
                                           font = dict(size = 20),
                                           xaxis = dict(title = 'X-axis'),
                                           yaxis = dict(title = 'Y-axis'))
-        
+        if Sigray:
+            detector.update_layout(yaxis=dict(autorange='reversed'))
         detector_2D_map_fig.show()
 
     # plotting detector mapping highlighting location of each sample_element
@@ -628,7 +630,8 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
                                          font = dict(size = 20),
                                          xaxis = dict(title = 'X-axis'),
                                          yaxis = dict(title = 'Y-axis'))
-        
+        if Sigray:
+            detector.update_layout(yaxis=dict(autorange='reversed'))
         element_2D_map_fig.show()
     
 
@@ -988,7 +991,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
         elif Sigray:
             ax.set_ylabel("y (mm)")
             ax.set_xlabel("x (mm)")
-            ax.invert_yaxis()
+
         im = ax.imshow(element_data, extent = [x_int.min(), x_int.max(), y_int.min(), y_int.max()], cmap='viridis')
         
         
@@ -1033,7 +1036,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
         if Sigray:
             ax.set_ylabel("y (mm)")
             ax.set_xlabel("x (mm)")
-            ax.invert_yaxis()
+
         plt.show()       
         
 
@@ -1107,7 +1110,8 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
                                       font = dict(size = 20),
                                       xaxis = dict(title = 'X-axis'),
                                       yaxis = dict(title = 'Y-axis'))
-    
+    if Sigray:
+        detector_2D_map_fig.update_layout(yaxis = dict(autorange = 'reversed'))
     detector_2D_map_fig.show()
 
     if bad_pixels > 0:
@@ -1125,6 +1129,8 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
                                           font = dict(size = 20),
                                           xaxis = dict(title = 'X-axis'),
                                           yaxis = dict(title = 'Y-axis'))
+        if Sigray:
+            detector_2D_map_fig.update_layout(yaxis = dict(autorange = 'reversed'))
         
         detector_2D_map_fig.show()
         
@@ -1336,7 +1342,7 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
         if Sigray:
             ax.set_ylabel("y (mm)")
             ax.set_xlabel("x (mm)")
-            ax.invert_yaxis()
+            
         im = ax.imshow(element_data, extent = [x_int.min(), x_int.max(), y_int.min(), y_int.max()], cmap='viridis')
         
         
@@ -1381,7 +1387,7 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
         elif Sigray:
             ax.set_ylabel("y (mm)")
             ax.set_xlabel("x (mm)")
-            ax.invert_yaxis()
+            
         plt.show()
 
    
@@ -1443,7 +1449,8 @@ def extract_detector_data(filename, Sigray = False):
                                       font = dict(size = 20),
                                       xaxis = dict(title = 'X-axis'),
                                       yaxis = dict(title = 'Y-axis'))
-    
+    if Sigray:
+        detector_2D_map_fig.update_layout(yaxis = dict(autorange= 'reversed'))
     detector_2D_map_fig.show()
     
     ########## Handling bad pixels ##########
@@ -1465,7 +1472,8 @@ def extract_detector_data(filename, Sigray = False):
                                           font = dict(size = 20),
                                           xaxis = dict(title = 'X-axis'),
                                           yaxis = dict(title = 'Y-axis'))
-        
+        if Sigray:
+            detector_2D_map_fig.update_layout(yaxis = dict(autorange= 'reversed'))
         detector_2D_map_fig.show()
     
     return detector_data, x_pos, y_pos
