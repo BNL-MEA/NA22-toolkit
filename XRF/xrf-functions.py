@@ -522,6 +522,8 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     # Position axes
     x_pos = np.linspace(pos_data[1].min(),pos_data[1].max(),data.shape[1])
     y_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),data.shape[0])
+    if Sigray:
+        y_pos = y_pos[::-1]
     
     # normalize data by ion_chmaber_data(i0)
     if not Sigray:
