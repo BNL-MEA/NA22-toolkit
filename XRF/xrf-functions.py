@@ -988,6 +988,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
         elif Sigray:
             ax.set_ylabel("y (mm)")
             ax.set_xlabel("x (mm)")
+            ax.invert_yaxis()
         im = ax.imshow(element_data, extent = [x_int.min(), x_int.max(), y_int.min(), y_int.max()], cmap='viridis')
         
         
@@ -1026,8 +1027,13 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
         # Place the legend outside the plot
         plt.legend(handles=[red_patch, blue_patch, green_patch], loc='center left', bbox_to_anchor=(1, 0.5))
         
-        ax.set_ylabel("y ($\mu$m)")
-        ax.set_xlabel("x ($\mu$m)")
+        if not Sigray:
+            ax.set_ylabel("y ($\mu$m)")
+            ax.set_xlabel("x ($\mu$m)")
+        if Sigray:
+            ax.set_ylabel("y (mm)")
+            ax.set_xlabel("x (mm)")
+            ax.invert_yaxis()
         plt.show()       
         
 
@@ -1330,6 +1336,7 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
         if Sigray:
             ax.set_ylabel("y (mm)")
             ax.set_xlabel("x (mm)")
+            ax.invert_yaxis()
         im = ax.imshow(element_data, extent = [x_int.min(), x_int.max(), y_int.min(), y_int.max()], cmap='viridis')
         
         
@@ -1374,6 +1381,7 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
         elif Sigray:
             ax.set_ylabel("y (mm)")
             ax.set_xlabel("x (mm)")
+            ax.invert_yaxis()
         plt.show()
 
    
