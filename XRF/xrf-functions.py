@@ -506,19 +506,19 @@ def peak_fitting(x, y, peaks, window):
 #     2. fig1: HTML figure containing all relevant data/information processed that
 #        can be used later to plot the results        
 #     3. peak_fit_params: parameters used to define the gaussian fit of peaks in background subtracted partilce spectrum
-def AOI_particle_analysis(filename, min_energy, sample_elements, background_elements, normalize = True):
+def AOI_particle_analysis(filename, min_energy, sample_elements, background_elements, Sigray = False):
     ########## Load data filenin variable ##########
     with h5py.File(filename, 'r') as file:
         data = file['xrfmap/detsum/counts'][:]
         pos_data = file['xrfmap/positions/pos'][:]
-        if normalize:
+        if not Sigray:
             ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
         group_name = 'xrfmap/scan_metadata'
         if group_name in file:
             group = file[group_name]
             attributes = dict(group.attrs)
             incident_energy = attributes['instrument_mono_incident_energy'] # keV
-            if normalize:
+            if not Sigray:
                 ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
         else:
             print(f"Group '{group_name}' not found in the HDF5 file.")
@@ -528,7 +528,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     y_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),data.shape[0])
     
     # normalize data by ion_chmaber_data(i0)
-    if normalize:
+    if not Sigray:
         data = data/ion_chamber_data[:,:,np.newaxis]
 
     # Use incident X-ray energy to define energy range of interest 
@@ -986,8 +986,12 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
         cax = divider.append_axes('right', size = '5%', pad = 0.05)
         
         ax.set_title('Energies in range: ' + str(round(energy[energy_ranges[i]].min(),3)) + '-' + str(round(energy[energy_ranges[i]].max(),3)) + ' keV')
-        ax.set_ylabel("y ($\mu$m)")
-        ax.set_xlabel("x ($\mu$m)")
+        if not Sigray:
+            ax.set_ylabel("y ($\mu$m)")
+            ax.set_xlabel("x ($\mu$m)")
+        elif Sigray:
+            ax.set_ylabel("y (mm)")
+            ax.set_xlabel("x (mm)")
         im = ax.imshow(element_data, extent = [x_int.min(), x_int.max(), y_int.min(), y_int.max()], cmap='viridis')
         
         
@@ -1054,19 +1058,19 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
 #     3. peak_fit_params: parameters used to define the gaussian fit of peaks in background subtracted partilce spectrum
 #     4. x_pos, y_pos: x and y position of the detector image location based on the sample stage
 #     5. matched_peaks: peaks matched to an element known to be present
-def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, prom, height, dist, bad_pixels, error_peaks, blank_file = None, normalize = True):
+def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, prom, height, dist, bad_pixels, error_peaks, blank_file = None, Sigray = False):
     ########## Load data filenin variable ##########
     with h5py.File(filename, 'r') as file:
         data = file['xrfmap/detsum/counts'][:]
         pos_data = file['xrfmap/positions/pos'][:]
-        if normalize:
+        if not Sigray:
             ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
         group_name = 'xrfmap/scan_metadata'
         if group_name in file:
             group = file[group_name]
             attributes = dict(group.attrs)
             incident_energy = attributes['instrument_mono_incident_energy'] # keV
-            if normalize:
+            if not Sigray:
                 ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
         else:
             print(f"Group '{group_name}' not found in the HDF5 file.")
@@ -1076,7 +1080,7 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
     y_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),data.shape[0])
     
     # normalize data by ion_chmaber_data(i0)
-    if normalize:
+    if not Sigray:
         data = data/ion_chamber_data[:,:,np.newaxis]
 
     ########## Use incident X-ray energy to define energy range of interest ##########
@@ -1364,8 +1368,12 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
         # Place the legend outside the plot
         plt.legend(handles=[red_patch, blue_patch, green_patch], loc='center left', bbox_to_anchor=(1, 0.5))
         
-        ax.set_ylabel("y ($\mu$m)")
-        ax.set_xlabel("x ($\mu$m)")
+        if not Sigray:
+            ax.set_ylabel("y ($\mu$m)")
+            ax.set_xlabel("x ($\mu$m)")
+        elif Sigray:
+            ax.set_ylabel("y (mm)")
+            ax.set_xlabel("x (mm)")
         plt.show()
 
    
@@ -1381,7 +1389,7 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
 # * Outputs
 #     1. detector_data
 #     2. x_pos, y_pos: x and y positions extracted from hdf5 file
-def extract_detector_data(filename, normalize = True):
+def extract_detector_data(filename, Sigray = False):
     ########## Load data file in variable ##########
     with h5py.File(filename, 'r') as file:
         data = file['xrfmap/detsum/counts'][:]
@@ -1391,7 +1399,7 @@ def extract_detector_data(filename, normalize = True):
             group = file[group_name]
             attributes = dict(group.attrs)
             incident_energy = attributes['instrument_mono_incident_energy'] # keV
-            if normalize:
+            if not Sigray:
                 ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
         else:
             print(f"Group '{group_name}' not found in the HDF5 file.")
@@ -1412,7 +1420,7 @@ def extract_detector_data(filename, normalize = True):
     y_pos = np.linspace(pos_data[0].min(),pos_data[0].max(),data.shape[0])
    
     # normalize data by ion_chmaber_data(i0)
-    if normalize:    
+    if not Sigray:    
         data = data/ion_chamber_data[:,:,np.newaxis]
 
     
