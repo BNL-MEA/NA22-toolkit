@@ -29,11 +29,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.patches as patches
 from plotly.subplots import make_subplots
 from matplotlib.cm import get_cmap
-# improve figure resolution
-%matplotlib inline
-%config InlineBackend.figure_format = 'retina'
-plt.rcParams.update({'figure.max_open_warning': 0})
-plt.rcParams["figure.constrained_layout.use"] = True
+
 
 # X-ray database
 import xraydb as xdb
