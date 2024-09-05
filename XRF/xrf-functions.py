@@ -579,7 +579,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
                                           xaxis = dict(title = 'X-axis'),
                                           yaxis = dict(title = 'Y-axis'))
         if Sigray:
-            detector.update_layout(yaxis=dict(autorange='reversed'))
+            detector_2D_map_fig.update_layout(yaxis=dict(autorange='reversed'))
         detector_2D_map_fig.show()
 
     # plotting detector mapping highlighting location of each sample_element
@@ -631,7 +631,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
                                          xaxis = dict(title = 'X-axis'),
                                          yaxis = dict(title = 'Y-axis'))
         if Sigray:
-            detector.update_layout(yaxis=dict(autorange='reversed'))
+            detector_2D_map_fig.update_layout(yaxis=dict(autorange='reversed'))
         element_2D_map_fig.show()
     
 
