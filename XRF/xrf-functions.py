@@ -407,7 +407,7 @@ r"""
 
     """
 
-def arpls(y, lam=1e4, ratio=0.01, itermax=1000):
+def arpls(y, lam=1e3, ratio=0.01, itermax=10000):
     N = len(y)
 #  D = sparse.csc_matrix(np.diff(np.eye(N), 2))
     D = sparse.eye(N, format='csc')
