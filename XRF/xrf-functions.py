@@ -697,7 +697,8 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     else:
         blank_filename = input("Input blank file data at same incident energy as sample data (if yes input variable containing file info, else enter no)?")
         if blank_filename.lower() == 'no':
-            AOI_bkg_sub = AOI
+            baseline = arpls(AOI)
+            AOI_bkg_sub = AOI - baseline
         else: 
             with h5py.File(blank_filename, 'r') as file:
                 blank_data = file['xrfmap/detsum/counts'][:]
