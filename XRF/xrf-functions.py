@@ -784,9 +784,9 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
         fig1.add_trace(go.Scatter(x = energy_int, y = background, mode = 'lines', name = 'Background Spectrum'))
         # Plot baseline spectrum
         fig1.add_trace(go.Scatter(x = energy_int, y = baseline, mode = 'lines', name = 'Baseline Spectrum'))
-    
-    # Plot smoothed spectrum 
-    fig1.add_trace(go.Scatter(x = energy_int, y = y_smoothed, mode = 'lines', name = 'Smoothed Spectrum'))
+    if not Sigray:
+        # Plot smoothed spectrum 
+        fig1.add_trace(go.Scatter(x = energy_int, y = y_smoothed, mode = 'lines', name = 'Smoothed Spectrum'))
     
     # Plot points identified as peaks
     fig1.add_trace(go.Scatter(x = energy_int[peaks], y = AOI_bkg_sub[peaks], mode = 'markers+text', name = 'Peak fit', text = labels))
@@ -826,7 +826,12 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
                 continue
             
             # Find peaks in data
-            peaks, properties = find_peaks(y_smoothed, prominence = prom, height = tall, distance = dist)
+            if not Sigray:
+                y_smoothed = np.exp(denoise_and_smooth_data(energy_int, np.log(AOI_bkg_sub)))
+                peaks, properties = find_peaks(y_smoothed, prominence = prom, height = height, distance = dist)
+            else: 
+                peaks, properties = find_peaks(AOI_bkg_sub, prominence = prom, height = height, distance = dist)
+            
             
             # Label peaks
             labels = []
@@ -859,6 +864,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
                 # Plot baseline spectrum
                 fig1.add_trace(go.Scatter(x = energy_int, y = baseline, mode = 'lines', name = 'Baseline Spectrum'))
             
+            if not Sigray:
             # Plot smoothed spectrum 
             fig1.add_trace(go.Scatter(x = energy_int, y = y_smoothed, mode = 'lines', name = 'Smoothed Spectrum'))
             
@@ -940,8 +946,9 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     fig1.add_trace(go.Scatter(x = energy_int, y = peak_fit, mode = 'lines', name ='AOI Spectrum Fit'))
     fig1.add_trace(go.Scatter(x = energy_int, y = bkg_fit, mode = 'lines', name = 'AOI Spectrum Bkg Fit'))
 
-    # Plot smoothed spectrum 
-    fig1.add_trace(go.Scatter(x = energy_int, y = y_smoothed, mode = 'lines', name = 'Smoothed Spectrum'))
+    if not Sigray:
+        # Plot smoothed spectrum 
+        fig1.add_trace(go.Scatter(x = energy_int, y = y_smoothed, mode = 'lines', name = 'Smoothed Spectrum'))
 
     # Plot points identified as peaks
     fig1.add_trace(go.Scatter(x = energy_int[peaks], y = AOI_bkg_sub[peaks],mode = 'markers+text', name = 'Peak fit', text = labels))
