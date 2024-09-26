@@ -745,8 +745,11 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     prom = 0.0001
     tall = 0.0001
     dist = 10
-    y_smoothed = np.exp(denoise_and_smooth_data(energy_int, np.log(AOI_bkg_sub)))
-    peaks, properties = find_peaks(y_smoothed, prominence = prom, height = tall, distance = dist)
+    if not Sigray:
+        y_smoothed = np.exp(denoise_and_smooth_data(energy_int, np.log(AOI_bkg_sub)))
+        peaks, properties = find_peaks(y_smoothed, prominence = prom, height = height, distance = dist)
+    else: 
+        peaks, properties = find_peaks(AOI_bkg_sub, prominence = prom, height = height, distance = dist)
 
    
     
@@ -1230,8 +1233,12 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
     
 
     ########## Find peaks in data using parameter thresholds ##########
-    y_smoothed = np.exp(denoise_and_smooth_data(energy_int, np.log(AOI_bkg_sub)))
-    peaks, properties = find_peaks(y_smoothed, prominence = prom, height = height, distance = dist)
+    if not Sigray:
+        y_smoothed = np.exp(denoise_and_smooth_data(energy_int, np.log(AOI_bkg_sub)))
+        peaks, properties = find_peaks(y_smoothed, prominence = prom, height = height, distance = dist)
+    else: 
+        peaks, properties = find_peaks(AOI_bkg_sub, prominence = prom, height = height, distance = dist)
+     
      # Label peaks
     labels = []
     for i in range(len(peaks)): labels.extend(['Peak '+str(i+1)])    
