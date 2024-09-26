@@ -865,8 +865,8 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
                 fig1.add_trace(go.Scatter(x = energy_int, y = baseline, mode = 'lines', name = 'Baseline Spectrum'))
             
             if not Sigray:
-            # Plot smoothed spectrum 
-            fig1.add_trace(go.Scatter(x = energy_int, y = y_smoothed, mode = 'lines', name = 'Smoothed Spectrum'))
+                # Plot smoothed spectrum 
+                fig1.add_trace(go.Scatter(x = energy_int, y = y_smoothed, mode = 'lines', name = 'Smoothed Spectrum'))
             
             
             # Plot points identified as peaks
