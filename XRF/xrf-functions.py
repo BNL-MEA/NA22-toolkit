@@ -504,7 +504,7 @@ def peak_fitting(x, y, peaks, window):
 #     2. fig1: HTML figure containing all relevant data/information processed that
 #        can be used later to plot the results        
 #     3. peak_fit_params: parameters used to define the gaussian fit of peaks in background subtracted partilce spectrum
-def AOI_particle_analysis(filename, min_energy, sample_elements, background_elements, Sigray = False):
+def AOI_particle_analysis(filename, min_energy, sample_elements, background_elements, denoise = True, Sigray = False):
     ########## Load data filenin variable ##########
     with h5py.File(filename, 'r') as file:
         data = file['xrfmap/detsum/counts'][:]
@@ -518,6 +518,8 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
             incident_energy = attributes['instrument_mono_incident_energy'] # keV
             if not Sigray:
                 ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
+                dwell_time = attributes['param_dwell'] # seconds
+                
         else:
             print(f"Group '{group_name}' not found in the HDF5 file.")
     
@@ -530,6 +532,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     # normalize data by ion_chmaber_data(i0)
     if not Sigray:
         data = data/ion_chamber_data[:,:,np.newaxis]
+        data = data/dwell_time
 
     # Use incident X-ray energy to define energy range of interest 
     # incident_wavelength = 1.2398e-9/incident_energy # convert incident energy to wavelength (hc/lambda)
@@ -551,7 +554,13 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     max_int = np.max(data, axis = 2, keepdims = True)
     temp = np.sum(max_int, axis = (2))
     
-    detector_2D_map_fig = go.Figure(data = go.Heatmap(z = temp, colorscale = 'Viridis', colorbar = {'exponentformat': 'e'}))
+    
+    # determine the bounds of the color map based on robust scaling similar to xarray robust=True
+    vmin = np.quantile(temp, 0.02)
+    vmax = np.quantile(temp, 1- 0.02)
+    
+    # plotting the map
+    detector_2D_map_fig = go.Figure(data = go.Heatmap(z = temp, zmin = vmin, zmax = vmax, colorscale = 'Viridis', colorbar = {'exponentformat': 'e'}))
     detector_2D_map_fig.update_layout(title_text = 'Summed XRF Map for <br>' + filename[-26:-13]+' @ '+str(incident_energy)+' keV', 
                                       title_x = 0.5,
                                       width = 500,
@@ -572,9 +581,14 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
         idx_flat = np.argpartition(temp.flatten(),k)[:k] # index of k lowest values 
         idx_2d = np.unravel_index(idx_flat,temp.shape)
         temp[idx_2d] = np.mean(temp) # new detecotr data without dead pixels 
+        
+         # determine the bounds of the color map based on robust scaling similar to xarray robust=True
+        vmin = np.quantile(temp, 0.02)
+        vmax = np.quantile(temp, 1- 0.02)
+
 
         # plot new data
-        detector_2D_map_fig = go.Figure(data = go.Heatmap(z = temp, colorscale = 'Viridis', colorbar = {'exponentformat': 'e'}))
+        detector_2D_map_fig = go.Figure(data = go.Heatmap(z = temp, zmin = vmin, zmax = vmax, colorscale = 'Viridis', colorbar = {'exponentformat': 'e'}))
         detector_2D_map_fig.update_layout(title_text = 'Summed XRF Map for <br>' + filename[-26:-13]+' @ '+str(incident_energy)+' keV', 
                                           title_x = 0.5,
                                           width = 500,
@@ -668,25 +682,20 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     ######### Selecting background area based on PyXRF mappings ##########
 
     # # y-direction
-    user_input = input("Utilizing the detector map outputted, enter x values for area containing background spectra in slice format (e.g., '1:5'). Input 'none' to analyze whole detector:")
-    if user_input.lower() != 'none':
-        detector_ROI_columns = input_to_slice(user_input)
-        detector_ROI_columns = slice(detector_ROI_columns.start+1, detector_ROI_columns.stop+1)
+    user_input = input("Subtract self-consistent detector background (yes or no)?:")
+    if user_input.lower() == 'yes':
+        AOI_shape = AOI_data.shape # get the shape of the area selected by the user above
+        npoints = AOI_shape[0]* AOI_shape[1] # find the number of pixels/points in the area selected above
         
-        # # x-direction
-        user_input = input("Utilizing the detector map outputted, enter y values for area containing background spectra in slice format (e.g., '1:5'):")
-        detector_ROI_rows = input_to_slice(user_input)
-        
+        # find the lowest intensities plotted in detector map
+        lowest_intensities = np.argsort(temp.flatten())[:npoints] # sort the intensities to find the npoints lowest values
+        low_int_idx = np.unravel_index(lowest_intensities, temp.shape) # extract 2d indices of lowest intensity
 
-        # identify background spectrum
-        bkg_data = data[detector_ROI_rows, detector_ROI_columns, :]
-     
-     
+        bkg_data = data[low_int_idx[1][:,np.newaxis], low_int_idx[0][:,np.newaxis], :] # extracting bkg_Data based on lowest intensities
        
         # Avg background spectrum in selected area
         background = np.mean(bkg_data, axis=(0,1))
-        background = background[min_idx:max_idx]
-        
+        background = background[min_idx:max_idx]       
 
         
         # Background subtracted AOI
@@ -697,45 +706,77 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
         # add baseline to AOI spectrum
         AOI_bkg_sub = AOI_bkg_sub + baseline
     else:
-        blank_filename = input("Input blank file data at same incident energy as sample data (if yes input variable containing file info, else enter no)?")
-        if blank_filename.lower() == 'no':
-            baseline = arpls(AOI)
-            AOI_bkg_sub = AOI - baseline
-        else: 
-            with h5py.File(blank_filename, 'r') as file:
-                blank_data = file['xrfmap/detsum/counts'][:]
-                blank_ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
-                group_name = 'xrfmap/scan_metadata'
-                if group_name in file:
-                    group = file[group_name]
-                    attributes = dict(group.attrs)
-                    blank_incident_energy = attributes['instrument_mono_incident_energy'] # keV
-                    blank_ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
-                else:
-                    print(f"Group '{group_name}' not found in the HDF5 file.")
+        user_input = input("Utilizing the detector map outputted, enter x values for area containing background spectra in slice format (e.g., '1:5'). Input 'none' to analyze whole detector:")
+        if user_input.lower() != 'none':
+            detector_ROI_columns = input_to_slice(user_input)
+            detector_ROI_columns = slice(detector_ROI_columns.start+1, detector_ROI_columns.stop+1)
             
-            # normalize data by ion_chmaber_data(i0)
-            blank_data = blank_data/blank_ion_chamber_data[:,:,np.newaxis]
-
-            # Use incident X-ray energy to define energy range of interest 
-            # incident_wavelength = 1.2398e-9/incident_energy # convert incident energy to wavelength (hc/lambda)
-            # compton_wavelength = 4.86e-12 + incident_wavelength # determine compton wavelength using maximum wavelength differential plus incident 
-            # max_energy = 1.2398e-9/compton_wavelength  # convert compton wavelength to energy and set the maximum energy to about the compton peak 
-            min_idx = max([i for i, v in enumerate(energy) if v <= min_energy])
-            max_idx = min([i for i, v in enumerate(energy) if v >= incident_energy])
-
-
-            # Total average spectrum
-            avg_blank_data = np.mean(blank_data, axis = (0,1)) 
-            avg_blank_data = avg_blank_data[min_idx:max_idx]
+            # # x-direction
+            user_input = input("Utilizing the detector map outputted, enter y values for area containing background spectra in slice format (e.g., '1:5'):")
+            detector_ROI_rows = input_to_slice(user_input)
+            
+    
+            # identify background spectrum
+            bkg_data = data[detector_ROI_rows, detector_ROI_columns, :]
+         
+         
+           
+            # Avg background spectrum in selected area
+            background = np.mean(bkg_data, axis=(0,1))
+            background = background[min_idx:max_idx]
+            
+    
             
             # Background subtracted AOI
-            baseline = arpls(avg_blank_data) # Baseline of AOI spectrum
-            AOI_bkg_sub = AOI - avg_blank_data
+            baseline = arpls(background) # Baseline of AOI spectrum
+            AOI_bkg_sub = AOI - background
             AOI_bkg_sub[AOI_bkg_sub <= 0] = 0
-
+    
             # add baseline to AOI spectrum
             AOI_bkg_sub = AOI_bkg_sub + baseline
+            
+        else:
+            blank_filename = input("Input blank file data at same incident energy as sample data (if yes input variable containing file info, else enter no)?")
+            if blank_filename.lower() == 'no':
+                baseline = arpls(AOI)
+                AOI_bkg_sub = AOI - baseline
+            else: 
+                with h5py.File(blank_filename, 'r') as file:
+                    blank_data = file['xrfmap/detsum/counts'][:]
+                    blank_ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
+                    group_name = 'xrfmap/scan_metadata'
+                    if group_name in file:
+                        group = file[group_name]
+                        attributes = dict(group.attrs)
+                        blank_incident_energy = attributes['instrument_mono_incident_energy'] # keV
+                        blank_ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
+                        blank_dwell_time = attributes['param_dwell'] # seconds
+                    else:
+                        print(f"Group '{group_name}' not found in the HDF5 file.")
+                
+                # normalize data by ion_chmaber_data(i0)
+                blank_data = blank_data/blank_ion_chamber_data[:,:,np.newaxis]
+                blank_data = black_data/blank_dwell_time
+    
+                # Use incident X-ray energy to define energy range of interest 
+                # incident_wavelength = 1.2398e-9/incident_energy # convert incident energy to wavelength (hc/lambda)
+                # compton_wavelength = 4.86e-12 + incident_wavelength # determine compton wavelength using maximum wavelength differential plus incident 
+                # max_energy = 1.2398e-9/compton_wavelength  # convert compton wavelength to energy and set the maximum energy to about the compton peak 
+                min_idx = max([i for i, v in enumerate(energy) if v <= min_energy])
+                max_idx = min([i for i, v in enumerate(energy) if v >= incident_energy])
+    
+    
+                # Total average spectrum
+                avg_blank_data = np.mean(blank_data, axis = (0,1)) 
+                avg_blank_data = avg_blank_data[min_idx:max_idx]
+                
+                # Background subtracted AOI
+                baseline = arpls(avg_blank_data) # Baseline of AOI spectrum
+                AOI_bkg_sub = AOI - avg_blank_data
+                AOI_bkg_sub[AOI_bkg_sub <= 0] = 0
+    
+                # add baseline to AOI spectrum
+                AOI_bkg_sub = AOI_bkg_sub + baseline
             
     
     
@@ -745,7 +786,11 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
     prom = 0.0001
     tall = 0.0001
     dist = 10
-    y_smoothed = np.exp(denoise_and_smooth_data(energy_int, np.log(AOI_bkg_sub)))
+    if denoise:
+        y_smoothed = np.exp(denoise_and_smooth_data(energy_int, np.log(AOI_bkg_sub)))
+    else:
+        y_smoothed = AOI_bkg_sub
+        
     peaks, properties = find_peaks(y_smoothed, prominence = prom, height = tall, distance = dist)
 
    
@@ -791,7 +836,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
 
     
     # Plot formatting
-    fig1.update_yaxes(title_text = 'Intensity (counts)', type = 'log', exponentformat = 'e')
+    fig1.update_yaxes(title_text = 'Intensity (counts/s)', type = 'log', exponentformat = 'e')
     fig1.update_xaxes(title_text = 'Energy (keV)')
     fig1.update_traces(line={'width': 5})
     fig1.show()
@@ -866,7 +911,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
            
 
             # Plot formatting
-            fig1.update_yaxes(title_text = 'Intensity (counts)', type = 'log', exponentformat = 'e')
+            fig1.update_yaxes(title_text = 'Intensity (counts/s)', type = 'log', exponentformat = 'e')
             fig1.update_xaxes(title_text = 'Energy (keV)')
             fig1.update_traces(line={'width': 5})
 
@@ -946,7 +991,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
 
     
     # Plot formatting
-    fig1.update_yaxes(title_text = 'Intensity (counts)', type = 'log', exponentformat = 'e')
+    fig1.update_yaxes(title_text = 'Intensity (counts/s)', type = 'log', exponentformat = 'e')
     fig1.update_xaxes(title_text = 'Energy (keV)')
     fig1.update_traces(line={'width': 5})
 
@@ -1068,7 +1113,7 @@ def AOI_particle_analysis(filename, min_energy, sample_elements, background_elem
 #     3. peak_fit_params: parameters used to define the gaussian fit of peaks in background subtracted partilce spectrum
 #     4. x_pos, y_pos: x and y position of the detector image location based on the sample stage
 #     5. matched_peaks: peaks matched to an element known to be present
-def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, prom, height, dist, bad_pixels, error_peaks, blank_file = None, Sigray = False):
+def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, prom, height, dist, bad_pixels, error_peaks, blank_file = None, denoise = True, Sigray = False):
     ########## Load data filenin variable ##########
     with h5py.File(filename, 'r') as file:
         data = file['xrfmap/detsum/counts'][:]
@@ -1082,6 +1127,8 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
             incident_energy = attributes['instrument_mono_incident_energy'] # keV
             if not Sigray:
                 ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
+                dwell_time = attributes['param_dwell'] # seconds
+                
         else:
             print(f"Group '{group_name}' not found in the HDF5 file.")
     
@@ -1094,6 +1141,8 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
     # normalize data by ion_chmaber_data(i0)
     if not Sigray:
         data = data/ion_chamber_data[:,:,np.newaxis]
+        data = data/dwell_time
+   
 
     ########## Use incident X-ray energy to define energy range of interest ##########
     # incident_wavelength = 1.2398e-9/incident_energy # convert incident energy to wavelength (hc/lambda)
@@ -1109,7 +1158,12 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
     ########## Detector data ##########
     max_int = np.max(data, axis = 2, keepdims = True)
     detector_data = np.sum(max_int,axis = (2))
-    detector_2D_map_fig = go.Figure(data = go.Heatmap(z = detector_data, colorscale = 'Viridis', colorbar = {'exponentformat': 'e'}))
+    
+    # set scaling to be robust
+    vmin = np.quantile(detector_data,0.02)
+    vmax = np.quantile(detector_data, 1- 0.02)
+    
+    detector_2D_map_fig = go.Figure(data = go.Heatmap(z = detector_data, zmin = vmin, zmax = vmax, colorscale = 'Viridis', colorbar = {'exponentformat': 'e'}))
     detector_2D_map_fig.update_layout(title_text = 'Summed XRF Map for <br>' + filename[-26:-13]+' @ '+str(incident_energy)+' keV', 
                                       title_x = 0.5,
                                       width = 500,
@@ -1126,9 +1180,13 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
         idx_flat = np.argpartition(detector_data.flatten(),k)[:k] # index of k lowest values 
         idx_2d = np.unravel_index(idx_flat,detector_data.shape)
         detector_data[idx_2d] = np.mean(detector_data) # new detecotr data without dead pixels 
+        
+         # set scaling to be robust
+        vmin = np.quantile(detector_data,0.02)
+        vmax = np.quantile(detector_data, 1- 0.02)
 
         # plot new data
-        detector_2D_map_fig = go.Figure(data = go.Heatmap(z = detector_data, colorscale = 'Viridis', colorbar = {'exponentformat': 'e'}))
+        detector_2D_map_fig = go.Figure(data = go.Heatmap(z = detector_data, zmin = vmin, zmax = vmax, colorscale = 'Viridis', colorbar = {'exponentformat': 'e'}))
         detector_2D_map_fig.update_layout(title_text = 'Summed XRF Map for <br>' + filename[-26:-13]+' @ '+str(incident_energy)+' keV', 
                                           title_x = 0.5,
                                           width = 500,
@@ -1181,8 +1239,8 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
         baseline = arpls(background) # Baseline of AOI spectrum
         AOI_bkg_sub = AOI - background
         AOI_bkg_sub[AOI_bkg_sub <= 0] = 0
-
         
+
 
         # add baseline to AOI spectrum
         AOI_bkg_sub = AOI_bkg_sub + baseline
@@ -1198,11 +1256,13 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
                     attributes = dict(group.attrs)
                     blank_incident_energy = attributes['instrument_mono_incident_energy'] # keV
                     blank_ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
+                    blank_dwell_time = attributes['param_dwell'] #seconds
                 else:
                     print(f"Group '{group_name}' not found in the HDF5 file.")
             
             # normalize data by ion_chmaber_data(i0)
             blank_data = blank_data/blank_ion_chamber_data[:,:,np.newaxis]
+            blank_data = blank_data/blank_dwell_time
 
             # Use incident X-ray energy to define energy range of interest 
             # incident_wavelength = 1.2398e-9/incident_energy # convert incident energy to wavelength (hc/lambda)
@@ -1223,19 +1283,48 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
 
             # add baseline to AOI spectrum
             AOI_bkg_sub = AOI_bkg_sub + baseline
+        # subtract the lowest N points as background
+        elif self_consistent_bkg:
+            AOI_shape = AOI_data.shape # get the shape of the area selected by the user above
+            npoints = AOI_shape[0]* AOI_shape[1] # find the number of pixels/points in the area selected above
+            
+            # find the lowest intensities plotted in detector map
+            lowest_intensities = np.argsort(detector_data.flatten())[:npoints] # sort the intensities to find the npoints lowest values
+            low_int_idx = np.unravel_index(lowest_intensities, detector_data.shape) # extract 2d indices of lowest intensity
+
+            bkg_data = data[low_int_idx[1][:,np.newaxis], low_int_idx[0][:,np.newaxis], :] # extracting bkg_Data based on lowest intensities
+           
+            # Avg background spectrum in selected area
+            background = np.mean(bkg_data, axis=(0,1))
+            background = background[min_idx:max_idx]       
+
+            
+            # Background subtracted AOI
+            baseline = arpls(background) # Baseline of AOI spectrum
+            AOI_bkg_sub = AOI - background
+            AOI_bkg_sub[AOI_bkg_sub <= 0] = 0
+
+            # add baseline to AOI spectrum
+            AOI_bkg_sub = AOI_bkg_sub + baseline
             
         else: 
-            AOI_bkg_sub = AOI
+            baseline = arpls(AOI)
+            AOI_bkg_sub = AOI - baseline
            
     
 
     ########## Find peaks in data using parameter thresholds ##########
-
-    y_smoothed = np.exp(denoise_and_smooth_data(energy_int, np.log(AOI_bkg_sub)))
+    if denoise:
+        y_smoothed = np.exp(denoise_and_smooth_data(energy_int, np.log(AOI_bkg_sub)))
+    else:
+        y_smoothed = AOI_bkg_sub
+    
     peaks, properties = find_peaks(y_smoothed, prominence = prom, height = height, distance = dist)
-     # Label peaks
+    # Label peaks
     labels = []
-    for i in range(len(peaks)): labels.extend(['Peak '+str(i+1)])    
+    for i in range(len(peaks)): labels.extend(['Peak '+str(i+1)])   
+    
+        
        
     ## Remove peaks resulting from overfitting/noise in data 
     if error_peaks:
@@ -1297,7 +1386,7 @@ def AOI_extractor(filename, min_energy, elements, AOI_x, AOI_y, BKG_x, BKG_y, pr
 
 
     # Plot formatting
-    fig1.update_yaxes(title_text = 'Intensity (counts)', type = 'log', exponentformat = 'e')
+    fig1.update_yaxes(title_text = 'Intensity (counts/s)', type = 'log', exponentformat = 'e')
     fig1.update_xaxes(title_text = 'Energy (keV)')
     fig1.update_traces(line={'width': 5})
 
@@ -1420,6 +1509,9 @@ def extract_detector_data(filename, Sigray = False):
             incident_energy = attributes['instrument_mono_incident_energy'] # keV
             if not Sigray:
                 ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
+                dwell_time = file['param_dwell'] # seconds
+                
+                
         else:
             print(f"Group '{group_name}' not found in the HDF5 file.")
 
@@ -1443,6 +1535,7 @@ def extract_detector_data(filename, Sigray = False):
     # normalize data by ion_chmaber_data(i0)
     if not Sigray:    
         data = data/ion_chamber_data[:,:,np.newaxis]
+        data = data/dwell_time
 
     
     ########## Detector data ##########
@@ -1511,6 +1604,7 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
             attributes = dict(group.attrs)
             incident_energy = attributes['instrument_mono_incident_energy'] # keV
             ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
+            dwell_time = attributes['param_dwell'] # seconds
         else:
             print(f"Group '{group_name}' not found in the HDF5 file.")
     
@@ -1531,6 +1625,7 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
     
     # normalize data by ion_chmaber_data(i0)
     standard_data = standard_data/ion_chamber_data[:,:,np.newaxis]
+    standard_data = standard_data/dwell_time
     
     # Total avg spectrum
     standard_avg_data = np.mean(standard_data, axis = (0,1))
@@ -1551,6 +1646,7 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
             attributes = dict(group.attrs)
             incident_energy = attributes['instrument_mono_incident_energy'] # keV
             ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
+            bkg_dwell_time = attributes['param_dwell'] #seconds
         else:
             print(f"Group '{group_name}' not found in the HDF5 file.")
     
@@ -1560,6 +1656,7 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
     
     # normalize data by ion_chmaber_data(i0)
     background_data = background_data/ion_chamber_data[:,:,np.newaxis]
+    background_data = background_data/bkg_dwell_time
     
     # Total avg spectrum
     background_avg_data = np.mean(background_data, axis = (0,1))
@@ -1648,9 +1745,12 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
         open_air_data = file['xrfmap/detsum/counts'][:]
         air_pos_data = file['xrfmap/positions/pos'][:]
         air_ion_chamber_data = file['xrfmap/scalers/val'][:,:,0]
+        air_dwell_time = attributes['param_dwell'] #seconds
+        
 
      # normalize data by ion_chmaber_data(i0)
     open_air_data = open_air_data/air_ion_chamber_data[:,:,np.newaxis]
+    open_air_data = open_air_data/air_dwell_time
 
     open_air_avg_data = np.mean(open_air_data, axis = (0,1))
     open_air_avg_data = open_air_avg_data[min_idx:max_idx]
@@ -1716,7 +1816,7 @@ def standard_data_extractor(standard_filename, background_filename, open_air_fil
     return fig, cal_eq, sum_open_air_integral
 
 
-def quantitative_analysis_curve(intensity_data, element_area_density_data, plot = True):
+def quantitative_analysis_curve(intensity_data, element_area_density_data, plot= True):
     # determine calibration curve function
     cal_eq = np.poly1d(np.polyfit(intensity_data,element_area_density_data,1))
     
@@ -1734,7 +1834,7 @@ def quantitative_analysis_curve(intensity_data, element_area_density_data, plot 
         plt.scatter(intensity_data, element_area_density_data, color = 'red', label = 'Standard data')
         plt.plot(x, y, label = 'Line of Best Fit')
         plt.legend(loc='lower right')
-        plt.xlabel('Integral Intensity (counts)', fontsize = 16)
+        plt.xlabel('Integral Intensity (counts/s)', fontsize = 16)
         plt.ylabel('Mass (pg)', fontsize = 16)
         plt.xticks(fontsize = 14)
         plt.yticks(fontsize = 14)
